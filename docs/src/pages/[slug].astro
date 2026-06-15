@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getCollection, render } from 'astro:content';
+import { parseComponent } from '../utils/component.js';
 
 export async function getStaticPaths() {
   const components = await getCollection('components');
@@ -11,17 +12,8 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { slug } = Astro.params;
 const { Content } = await render(entry);
-
-const body = entry.body ?? '';
-const nameMatch = body.match(/^#\s+(.+)/m);
-const name = nameMatch ? nameMatch[1].trim() : slug;
-const description =
-  body
-    .split('\n')
-    .map((l) => l.trim())
-    .find((l) => l && !l.startsWith('#')) ?? '';
+const { slug, name, description } = parseComponent(entry);
 ---
 
 <Layout title={name} description={description} currentSlug={slug}>
