@@ -10,6 +10,7 @@ export default class extends Controller {
       this._submitHandler = (event) => this.validate(event);
       this._form.addEventListener("submit", this._submitHandler);
     }
+    this._initValid();
   }
 
   disconnect() {
@@ -31,5 +32,11 @@ export default class extends Controller {
     if (!valid && event?.type === "submit") {
       event.preventDefault();
     }
+  }
+
+  _initValid() {
+    const valid =
+      this.checkboxTargets.filter((cb) => cb.checked).length >= this.minValue;
+    this.element.dataset.valid = valid;
   }
 }

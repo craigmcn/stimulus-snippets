@@ -123,4 +123,94 @@ describe("ClipboardController", () => {
     await Promise.resolve();
     expect(writeText).toHaveBeenCalled();
   });
+
+  it("does not throw when clipboard write is rejected", async () => {
+    writeText.mockRejectedValue(new DOMException("Permission denied"));
+
+    await setup(`
+      <div data-controller="clipboard">
+        <input data-clipboard-target="source" value="text">
+        <span id="feedback" data-clipboard-target="feedback" hidden>Copied!</span>
+        <button id="btn" data-action="click->clipboard#copy">Copy</button>
+      </div>
+    `);
+
+    document.getElementById("btn").click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(document.getElementById("feedback").hidden).toBe(true);
+  });
+
+  it("cancels the feedback timer on disconnect", async () => {
+    await setup(`
+      <div id="ctrl" data-controller="clipboard">
+        <input data-clipboard-target="source" value="text">
+        <span id="feedback" data-clipboard-target="feedback" hidden>Copied!</span>
+        <button id="btn" data-action="click->clipboard#copy">Copy</button>
+      </div>
+    `);
+
+    vi.useFakeTimers();
+    document.getElementById("btn").click();
+    await Promise.resolve();
+
+    const feedback = document.getElementById("feedback");
+    expect(feedback.hidden).toBe(false);
+
+    document.getElementById("ctrl").remove();
+    await Promise.resolve();
+
+    vi.advanceTimersByTime(3000);
+
+    expect(feedback.hidden).toBe(false);
+  });
+
+  it("does not crash when navigator.clipboard is unavailable", async () => {
+    const originalClipboard = navigator.clipboard;
+    Object.defineProperty(navigator, "clipboard", {
+      value: undefined,
+      configurable: true,
+    });
+
+    await setup(`
+      <div data-controller="clipboard">
+        <input data-clipboard-target="source" value="text">
+        <button id="btn" data-action="click->clipboard#copy">Copy</button>
+      </div>
+    `);
+
+    expect(() => document.getElementById("btn").click()).not.toThrow();
+
+    Object.defineProperty(navigator, "clipboard", {
+      value: originalClipboard,
+      configurable: true,
+    });
+  });
+
+  it("resets the feedback timer on rapid copy so feedback stays visible for the full duration", async () => {
+    await setup(`
+      <div data-controller="clipboard" data-clipboard-success-duration-value="2000">
+        <input data-clipboard-target="source" value="text">
+        <span id="feedback" data-clipboard-target="feedback" hidden>Copied!</span>
+        <button id="btn" data-action="click->clipboard#copy">Copy</button>
+      </div>
+    `);
+
+    vi.useFakeTimers();
+
+    document.getElementById("btn").click();
+    await Promise.resolve();
+    expect(document.getElementById("feedback").hidden).toBe(false);
+
+    vi.advanceTimersByTime(1000);
+    document.getElementById("btn").click();
+    await Promise.resolve();
+
+    vi.advanceTimersByTime(1999);
+    expect(document.getElementById("feedback").hidden).toBe(false);
+
+    vi.advanceTimersByTime(1);
+    expect(document.getElementById("feedback").hidden).toBe(true);
+  });
 });
