@@ -10,6 +10,7 @@ export default class extends Controller {
       this._submitHandler = (event) => this.validate(event);
       this._form.addEventListener("submit", this._submitHandler);
     }
+    this.validate();
   }
 
   disconnect() {

@@ -10,14 +10,21 @@ export default class extends Controller {
     const source = this.sourceTarget;
     const text = "value" in source ? source.value : source.textContent.trim();
 
-    navigator.clipboard.writeText(text).then(() => {
-      if (this.hasFeedbackTarget) {
-        this.feedbackTarget.hidden = false;
-        setTimeout(
-          () => (this.feedbackTarget.hidden = true),
-          this.successDurationValue,
-        );
-      }
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        if (this.hasFeedbackTarget) {
+          this.feedbackTarget.hidden = false;
+          this._timer = setTimeout(
+            () => (this.feedbackTarget.hidden = true),
+            this.successDurationValue,
+          );
+        }
+      })
+      .catch(() => {});
+  }
+
+  disconnect() {
+    clearTimeout(this._timer);
   }
 }

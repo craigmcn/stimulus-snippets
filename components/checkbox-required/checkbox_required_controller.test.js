@@ -69,6 +69,23 @@ describe("CheckboxRequiredController", () => {
   });
 
   describe("data-valid attribute", () => {
+    it("sets data-valid on connect before any interaction", async () => {
+      await setup();
+      expect(document.getElementById("group").dataset.valid).toBe("false");
+    });
+
+    it("sets data-valid to true on connect when checkboxes are pre-checked", async () => {
+      await setup(`
+        <form id="form">
+          <fieldset id="group" data-controller="checkbox-required">
+            <input type="checkbox" id="a" checked data-checkbox-required-target="checkbox">
+            <input type="checkbox" id="b" data-checkbox-required-target="checkbox">
+          </fieldset>
+        </form>
+      `);
+      expect(document.getElementById("group").dataset.valid).toBe("true");
+    });
+
     it("sets data-valid to false when invalid", async () => {
       await setup();
       submitForm();

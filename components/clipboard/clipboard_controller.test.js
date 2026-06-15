@@ -123,4 +123,43 @@ describe("ClipboardController", () => {
     await Promise.resolve();
     expect(writeText).toHaveBeenCalled();
   });
+
+  it("does not throw when clipboard write is rejected", async () => {
+    writeText.mockRejectedValue(new DOMException("Permission denied"));
+
+    await setup(`
+      <div data-controller="clipboard">
+        <input data-clipboard-target="source" value="text">
+        <span id="feedback" data-clipboard-target="feedback" hidden>Copied!</span>
+        <button id="btn" data-action="click->clipboard#copy">Copy</button>
+      </div>
+    `);
+
+    document.getElementById("btn").click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(document.getElementById("feedback").hidden).toBe(true);
+  });
+
+  it("cancels the feedback timer on disconnect", async () => {
+    await setup(`
+      <div id="ctrl" data-controller="clipboard">
+        <input data-clipboard-target="source" value="text">
+        <span id="feedback" data-clipboard-target="feedback" hidden>Copied!</span>
+        <button id="btn" data-action="click->clipboard#copy">Copy</button>
+      </div>
+    `);
+
+    vi.useFakeTimers();
+    document.getElementById("btn").click();
+    await Promise.resolve();
+
+    expect(document.getElementById("feedback").hidden).toBe(false);
+
+    document.getElementById("ctrl").remove();
+    vi.advanceTimersByTime(3000);
+
+    expect(() => vi.runAllTimers()).not.toThrow();
+  });
 });

@@ -13,7 +13,11 @@ export default class extends Controller {
       if (min !== undefined) {
         passes = value.length >= parseInt(min, 10);
       } else if (pattern !== undefined) {
-        passes = new RegExp(pattern).test(value);
+        try {
+          passes = new RegExp(pattern).test(value);
+        } catch {
+          passes = false;
+        }
       }
 
       rule.dataset.valid = passes;

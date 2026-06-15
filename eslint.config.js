@@ -17,6 +17,7 @@ export default [
         parseInt: "readonly",
         RegExp: "readonly",
         Event: "readonly",
+        DOMException: "readonly",
       },
     },
     rules: {

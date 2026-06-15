@@ -82,6 +82,13 @@ describe("PasswordRulesController", () => {
       check();
       expect(document.getElementById("rule").dataset.valid).toBe("false");
     });
+
+    it("leaves a malformed pattern rule invalid without throwing", async () => {
+      await setupPatternRule("[invalid(");
+      document.getElementById("input").value = "anything";
+      expect(() => check()).not.toThrow();
+      expect(document.getElementById("rule").dataset.valid).toBe("false");
+    });
   });
 
   describe("multiple rules", () => {
