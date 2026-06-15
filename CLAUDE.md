@@ -71,7 +71,7 @@ components/
 ### Completed
 
 - **7 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`
-- **55 tests** across 7 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- **64 tests** across 7 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
 - `@vitest/eslint-plugin` added so `describe`/`it`/`expect`/`vi` globals are recognized in test files
 - Bug fixed in `password-reveal`: label toggling logic was inverted (`isPassword` / `!isPassword` were swapped on `showLabel` / `hideLabel`)
@@ -79,19 +79,30 @@ components/
 - MIT LICENSE added; `CODEOWNERS` (`* @craigmcn`) added; version bumped to `1.0.0`
 - Root `README.md` updated: new components in the table; "Well-covered elsewhere" section listing mature third-party alternatives
 - Initial commit pushed to `main` on `github.com/craigmcn/stimulus-snippets`
+- Branch ruleset applied to `main` via `gh` CLI (1 required review, stale-review dismissal, `check` status check, no force-push/delete)
 
-### Known bugs to fix (from code review)
+### Bug fixes — PR #1 (`fix/review-findings`, open)
 
-- **`clipboard`: missing `.catch()`** — `navigator.clipboard.writeText()` rejection is unhandled; user gets no feedback when clipboard permission is denied or context is insecure
-- **`password-rules`: unguarded `new RegExp()`** — a malformed `data-pattern` attribute throws `SyntaxError` inside `forEach`, aborting all subsequent rule evaluations
-- **`checkbox-required`: no `validate()` on `connect()`** — `data-valid` attribute is absent at page load, so CSS selectors like `[data-valid="false"]` never match until the user first submits or changes a checkbox
-- **`clipboard`: no `disconnect()`** — the `setTimeout` timer is never cancelled; leaks on Turbo Drive navigation
+Four confirmed bugs fixed across two rounds of review (Claude `/code-review high` + GitHub Copilot):
+
+- **`clipboard`: `navigator.clipboard` guard** — `if (!navigator.clipboard) return;` at top of `copy()`; the `.catch()` does not intercept the synchronous `TypeError` thrown in non-HTTPS contexts
+- **`clipboard`: rapid-copy timer debounce** — `clearTimeout(this._timer)` before creating a new timer so double-clicks don't orphan the previous callback and hide feedback early
+- **`clipboard`: `disconnect()` added** — `clearTimeout(this._timer)` on disconnect prevents timer firing on a detached element after Turbo Drive navigation
+- **`checkbox-required`: separate init from error display** — `_initValid()` sets `data-valid` on connect without touching the error target, so pristine forms don't show validation errors before user interaction; `validate()` (called on submit/change) still manages error target visibility
+- **`password-rules`: `new RegExp()` guarded** — `try/catch` prevents a malformed `data-pattern` from aborting the entire `forEach`; `Number.isNaN` guard added for empty `data-min` attribute
+- **Tests strengthened** — disconnect test now asserts `feedback.hidden` stays false after timer elapses (required flushing MutationObserver micro-task with `await Promise.resolve()` before `vi.advanceTimersByTime()`); 3 new clipboard tests; 1 new checkbox-required test; 1 new password-rules test
+
+### Key decisions
+
+- **`_initValid()` vs. calling `validate()` from connect** — `validate()` has two jobs (set `data-valid` + toggle error target). Calling it raw from `connect()` showed errors before user interaction. Extracted `_initValid()` to do only the data-attribute write; `validate()` continues to manage error visibility on user events.
+- **Blanket `.catch(() => {})` retained** — the `.then()` body contains no realistic throw paths (`hasFeedbackTarget`, `.hidden`, `setTimeout`), so a narrower DOMException-only catch would add complexity for no practical benefit. The guard before the call handles the only real crash path (undefined clipboard).
+- **MutationObserver micro-task flush** — with `vi.useFakeTimers()`, Stimulus's disconnect() is triggered by a MutationObserver callback (micro-task). An `await Promise.resolve()` is needed after `remove()` before advancing fake timers to ensure `clearTimeout` runs first.
 
 ### Lower-priority follow-ups
 
 - `slug`: document that non-Latin scripts (CJK, Arabic, emoji) produce an empty string — README-only change
 - `slug`: `this.locked` has no DOM backing and resets if the controller reconnects after the output is cleared
-- `checkbox-required`: no console warning when the element is not inside a `<form>` — silent no-op is confusing
+- `checkbox-required`: no `console.warn` when the element is not inside a `<form>` — silent no-op is confusing
 
 ### Next components (planned)
 
@@ -102,13 +113,3 @@ See the research plan for full prioritized list. Top picks:
 3. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
 4. `file-preview` — thumbnail/filename before form submit (no canonical package)
 5. `dependent-select` — client-side Country→State filtering
-
-### GitHub settings still needed
-
-Configure manually in **Settings → Branches → Rulesets** for `main`:
-
-- Require 1 approving review (code-owner review — CODEOWNERS is in place)
-- Dismiss stale reviews on new push
-- Require status checks: the `check` job from `ci.yml`
-- Block force pushes
-- Block branch deletion
