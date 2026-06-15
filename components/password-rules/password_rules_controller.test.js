@@ -57,6 +57,18 @@ describe("PasswordRulesController", () => {
       check();
       expect(document.getElementById("rule").dataset.valid).toBe("true");
     });
+
+    it("marks a rule with an empty data-min as invalid rather than always-failing from NaN", async () => {
+      await setup(`
+        <div data-controller="password-rules">
+          <input id="input" type="password" data-password-rules-target="input" data-action="input->password-rules#check">
+          <li id="rule" data-password-rules-target="rule" data-min="">At least N characters</li>
+        </div>
+      `);
+      document.getElementById("input").value = "anything";
+      check();
+      expect(document.getElementById("rule").dataset.valid).toBe("false");
+    });
   });
 
   describe("pattern rule", () => {

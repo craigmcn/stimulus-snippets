@@ -86,6 +86,11 @@ describe("CheckboxRequiredController", () => {
       expect(document.getElementById("group").dataset.valid).toBe("true");
     });
 
+    it("does not show the error target on connect for an initially-invalid form", async () => {
+      await setup();
+      expect(document.getElementById("error").hidden).toBe(true);
+    });
+
     it("sets data-valid to false when invalid", async () => {
       await setup();
       submitForm();

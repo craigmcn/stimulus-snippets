@@ -5,6 +5,7 @@
       "Bash(yarn lint)",
       "Bash(yarn format)",
       "Bash(yarn install --immutable)",
+      "Bash(yarn test*)",
       "Bash(git status)",
       "Bash(git log*)",
       "Bash(git diff*)",

@@ -7,6 +7,8 @@ export default class extends Controller {
   };
 
   copy() {
+    if (!navigator.clipboard) return;
+
     const source = this.sourceTarget;
     const text = "value" in source ? source.value : source.textContent.trim();
 
@@ -15,6 +17,7 @@ export default class extends Controller {
       .then(() => {
         if (this.hasFeedbackTarget) {
           this.feedbackTarget.hidden = false;
+          clearTimeout(this._timer);
           this._timer = setTimeout(
             () => (this.feedbackTarget.hidden = true),
             this.successDurationValue,

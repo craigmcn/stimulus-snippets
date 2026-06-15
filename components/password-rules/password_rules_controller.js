@@ -11,7 +11,8 @@ export default class extends Controller {
       let passes = false;
 
       if (min !== undefined) {
-        passes = value.length >= parseInt(min, 10);
+        const minNum = parseInt(min, 10);
+        passes = !Number.isNaN(minNum) && value.length >= minNum;
       } else if (pattern !== undefined) {
         try {
           passes = new RegExp(pattern).test(value);

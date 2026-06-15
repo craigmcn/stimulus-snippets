@@ -4,7 +4,7 @@ Copy-pasteable Stimulus JS controllers for Ruby on Rails. Modelled after shadcn/
 
 ## What this is (and isn't)
 
-- Vanilla JavaScript (no TypeScript, no React, no Vite, no test framework)
+- Vanilla JavaScript (no TypeScript, no React, no Vite)
 - No build output — the `components/` folder is the deliverable
 - No CSS — behaviour only; visual state communicated via `data-*` attributes
 
