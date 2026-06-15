@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn format:check)",
+      "Bash(yarn lint)",
+      "Bash(yarn format)",
+      "Bash(yarn install --immutable)",
+      "Bash(git status)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(find . *)",
+      "Bash(ls*)",
+      "Bash(grep*)"
+    ]
+  }
+}
