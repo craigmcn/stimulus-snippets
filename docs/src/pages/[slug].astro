@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import { parseComponent } from '../utils/component.js';
+
+export async function getStaticPaths() {
+  const components = await getCollection('components');
+  return components.map((entry) => ({
+    params: { slug: entry.id.split('/')[0] },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { slug, name, description } = parseComponent(entry);
+---
+
+<Layout title={name} description={description} currentSlug={slug}>
+  <article class="prose">
+    <Content />
+  </article>
+</Layout>
