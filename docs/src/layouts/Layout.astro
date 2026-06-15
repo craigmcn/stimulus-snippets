@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import '../styles/global.css';
+
+const { title, description = 'Copy-pasteable Stimulus JS controllers for Ruby on Rails.', currentSlug } =
+  Astro.props;
+
+const allComponents = await getCollection('components');
+const navItems = allComponents
+  .map((entry) => {
+    const slug = entry.id.split('/')[0];
+    const nameMatch = entry.body?.match(/^#\s+(.+)/m);
+    const name = nameMatch ? nameMatch[1].trim() : slug;
+    return { slug, name };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title ? `${title} — stimulus-snippets` : 'stimulus-snippets'}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-inner">
+          <a href="/" class="logo">
+            <span class="logo-primary">stimulus</span><span class="logo-secondary">-snippets</span>
+          </a>
+          <nav aria-label="Components">
+            <p class="nav-label">Components</p>
+            <ul>
+              {
+                navItems.map(({ slug, name }) => (
+                  <li>
+                    <a
+                      href={`/${slug}`}
+                      class:list={['nav-link', { active: slug === currentSlug }]}
+                      aria-current={slug === currentSlug ? 'page' : undefined}
+                    >
+                      {name}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+        </div>
+      </aside>
+      <main class="content">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

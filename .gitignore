@@ -1,3 +1,7 @@
 node_modules/
 .yarn/cache
 .yarn/install-state.gz
+
+# docs site build artifacts
+docs/.astro/
+docs/dist/

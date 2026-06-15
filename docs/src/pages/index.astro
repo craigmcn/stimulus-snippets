@@ -1,0 +1,42 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allComponents = await getCollection('components');
+const items = allComponents
+  .map((entry) => {
+    const slug = entry.id.split('/')[0];
+    const body = entry.body ?? '';
+    const nameMatch = body.match(/^#\s+(.+)/m);
+    const name = nameMatch ? nameMatch[1].trim() : slug;
+    const description = body
+      .split('\n')
+      .map((l) => l.trim())
+      .find((l) => l && !l.startsWith('#')) ?? '';
+    return { slug, name, description };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<Layout title="">
+  <div class="hero">
+    <h1>stimulus-snippets</h1>
+    <p class="hero-desc">
+      Copy-pasteable Stimulus JS controllers for Ruby on Rails. Inspired by <a
+        href="https://ui.shadcn.com">shadcn/ui</a
+      > — not an installable package, just files you own.
+    </p>
+  </div>
+
+  <p class="section-label">Components</p>
+  <div class="component-grid">
+    {
+      items.map(({ slug, name, description }) => (
+        <a href={`/${slug}`} class="component-card">
+          <strong>{name}</strong>
+          <p>{description}</p>
+        </a>
+      ))
+    }
+  </div>
+</Layout>
