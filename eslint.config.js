@@ -3,6 +3,7 @@ import prettierConfig from "eslint-config-prettier";
 import vitest from "@vitest/eslint-plugin";
 
 export default [
+  { ignores: ["docs/**"] },
   js.configs.recommended,
   prettierConfig,
   {
