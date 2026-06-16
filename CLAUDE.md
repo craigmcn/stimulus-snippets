@@ -93,6 +93,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **PR #2 merged** — docs site in `docs/` (Astro 5, Cloudflare Pages, stimulus-snippets.dev); dark/light/system theme toggle; CI docs job
 - **PR #3 merged** (`fix/follow-up-cleanups`) — `slug` lock DOM-backed via `lockedValue`; `slug` README non-Latin note; `checkbox-required` `console.warn` when outside form; `console` + `KeyboardEvent` added to ESLint globals
 - **PR #4 merged** (`feat/tabs-controller`) — `tabs` controller: full ARIA tablist, arrow-key nav, auto ID generation; addressed code review feedback from Claude and Copilot; 90 tests total
+- **PR #5 merged** (`feat/accordion-controller`) — `accordion` controller: ARIA disclosure pattern, arrow-key nav, exclusive-open mode; `_closePanel(index)` helper extracted per Copilot review; 115 tests total
 - DNS/email spoofing records (`SPF`, `DMARC`, `www` redirect) resolved in Cloudflare
 
 ### Key decisions
@@ -108,13 +109,15 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **`tabs` `_activate` clamps index** — out-of-bounds `data-tabs-index-value` (or programmatic set) is clamped to `[0, count-1]`; guard for empty tab list. Prevents the silent broken state where all panels hide and no tab is reachable.
 - **`accordion` uses heading + button pattern, not `<details>`/`<summary>`** — `<details name>` covers single-open natively in 2026, but the ARIA accordion pattern (heading + `aria-expanded`) gives screen reader users heading-level navigation. Controller adds value where `<details>` can't: `aria-controls`/`aria-labelledby` wiring, arrow-key focus movement between triggers, and coordinated exclusive-open mode. `toggle()` called directly from action methods (not via value callback) so panel state updates are synchronous.
 - **`accordion` exclusive enforcement runs on both connect and toggle** — if the page loads with multiple panels open and `exclusive` is true, all but the first open panel are closed on connect. This normalizes authoring mistakes without requiring JS-only initialization.
+- **Docs SEO/discoverability: `@astrojs/sitemap` + OG/JSON-LD + `/llms.txt` + `/all`** — sitemap auto-generated at build; OG/Twitter/JSON-LD (`WebSite` on home, `TechArticle` on controller pages) in `Layout.astro`; `/llms.txt` is a dynamic Astro endpoint (auto-updates as controllers are added); `/all` renders all READMEs in one page for LLM single-request reads. JSON-LD uses `Astro.site?.origin` (not a hardcoded string) and escapes `<` as `<` to prevent `</script>` breakout. Distribution tactics (community links, GitHub Topics) intentionally deferred.
 
 ### Open PRs (pending merge)
 
-- **PR #5** `feat/accordion-controller` — in progress; Copilot review addressed: extracted `_closePanel(index)` helper to eliminate duplicated exclusive-close logic between `connect()` and `toggle()`; PR description test count corrected (25, not 30); IME `isComposing` follow-up resolved as not actionable — triggers must be `<button>` elements so composition events cannot fire on them; if `keydown` is ever wired to a non-button element, add `if (event.isComposing) return` guard.
+- **PR #6** (`feat/seo-discoverability`) — SEO and AI discoverability improvements to `docs/`; Claude + Copilot review addressed (Astro.site, XSS escape, sidebar /all link, hr fix, unused var, Rails path typo, engines.node floor)
 
 ### Next components (planned)
 
-1. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
-2. `file-preview` — thumbnail/filename before form submit (no canonical package)
-3. `dependent-select` — client-side Country→State filtering
+1. `autogrow` — textarea that grows to fit content as the user types
+2. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
+3. `file-preview` — thumbnail/filename before form submit (no canonical package)
+4. `dependent-select` — client-side Country→State filtering

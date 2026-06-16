@@ -16,7 +16,7 @@ const { Content } = await render(entry);
 const { slug, name, description } = parseComponent(entry);
 ---
 
-<Layout title={name} description={description} currentSlug={slug}>
+<Layout title={`${name} Controller`} description={description} currentSlug={slug}>
   <article class="prose">
     <Content />
   </article>

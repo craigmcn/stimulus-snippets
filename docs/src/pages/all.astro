@@ -1,0 +1,43 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import { parseComponent } from '../utils/component.js';
+
+const components = await getCollection('components');
+const items = await Promise.all(
+  components
+    .map(parseComponent)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(async ({ slug, name }) => {
+      const entry = components.find((c) => c.id.split('/')[0] === slug)!;
+      const { Content } = await render(entry);
+      return { slug, name, Content };
+    })
+);
+---
+
+<Layout
+  title="All Controllers"
+  description="All Stimulus JS controllers in stimulus-snippets — copy-pasteable for Ruby on Rails."
+>
+  <div class="prose">
+    <h1>All Controllers</h1>
+    <p>
+      A single-page reference for all controllers in stimulus-snippets. Each section is also
+      available as its own page.
+    </p>
+    <nav aria-label="On this page">
+      <ul>
+        {items.map(({ slug, name }) => <li><a href={`#${slug}`}>{name} Controller</a></li>)}
+      </ul>
+    </nav>
+    {
+      items.map(({ slug, name, Content }, i) => (
+        <section id={slug}>
+          {i > 0 && <hr />}
+          <Content />
+        </section>
+      ))
+    }
+  </div>
+</Layout>
