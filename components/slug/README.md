@@ -54,7 +54,9 @@ Once the user manually edits the output field, auto-generation stops. If the out
 
 ### Values
 
-None.
+| Value    | Type    | Default | Description                                                                                                                                                                                                                                     |
+| -------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `locked` | Boolean | `false` | When `true`, auto-generation is disabled. Stored as `data-slug-locked-value` on the controller element; survives controller reconnects. Set by the controller on connect (if the output is pre-filled) or when the user edits the output field. |
 
 ### Actions
 
