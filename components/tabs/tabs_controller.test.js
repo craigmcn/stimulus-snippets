@@ -152,6 +152,27 @@ describe("TabsController", () => {
       expect(tab.getAttribute("aria-controls")).toBe(panel.id);
       expect(panel.getAttribute("aria-labelledby")).toBe(tab.id);
     });
+
+    it("assigns unique IDs when multiple controllers lack ids", async () => {
+      await setup(`
+        <div data-controller="tabs">
+          <div role="tablist">
+            <button type="button" data-tabs-target="tab" data-action="click->tabs#select keydown->tabs#keydown">Tab 1</button>
+          </div>
+          <div data-tabs-target="panel">Panel 1</div>
+        </div>
+        <div data-controller="tabs">
+          <div role="tablist">
+            <button type="button" data-tabs-target="tab" data-action="click->tabs#select keydown->tabs#keydown">Tab 2</button>
+          </div>
+          <div data-tabs-target="panel">Panel 2</div>
+        </div>
+      `);
+      const [a, b] = document.querySelectorAll("[data-controller='tabs']");
+      expect(a.id).toBeTruthy();
+      expect(b.id).toBeTruthy();
+      expect(a.id).not.toBe(b.id);
+    });
   });
 
   describe("select", () => {
@@ -241,6 +262,26 @@ describe("TabsController", () => {
       expect(document.getElementById("t0").getAttribute("aria-selected")).toBe(
         "true",
       );
+    });
+  });
+
+  describe("out-of-bounds index", () => {
+    it("clamps an out-of-bounds index to the last tab", async () => {
+      await setup(`
+        <div id="widget" data-controller="tabs" data-tabs-index-value="99">
+          <div role="tablist">
+            <button type="button" id="t0" data-tabs-target="tab" data-action="click->tabs#select keydown->tabs#keydown">Tab 1</button>
+            <button type="button" id="t1" data-tabs-target="tab" data-action="click->tabs#select keydown->tabs#keydown">Tab 2</button>
+          </div>
+          <div id="p0" data-tabs-target="panel">Panel 1</div>
+          <div id="p1" data-tabs-target="panel">Panel 2</div>
+        </div>
+      `);
+      expect(document.getElementById("t1").getAttribute("aria-selected")).toBe(
+        "true",
+      );
+      expect(document.getElementById("p1").hidden).toBe(false);
+      expect(document.getElementById("p0").hidden).toBe(true);
     });
   });
 

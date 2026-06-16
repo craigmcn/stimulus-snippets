@@ -7,7 +7,13 @@ export default class extends Controller {
   static values = { index: { type: Number, default: 0 } };
 
   connect() {
-    if (!this.element.id) this.element.id = `tabs-${++uid}`;
+    if (!this.element.id) {
+      let id;
+      do {
+        id = `tabs-${++uid}`;
+      } while (document.getElementById(id));
+      this.element.id = id;
+    }
 
     this.tabTargets.forEach((tab, i) => {
       tab.setAttribute("role", "tab");
@@ -72,13 +78,16 @@ export default class extends Controller {
   }
 
   _activate(index) {
+    const count = this.tabTargets.length;
+    if (count === 0) return;
+    const clamped = Math.max(0, Math.min(index, count - 1));
     this._activated = true;
     this.tabTargets.forEach((tab, i) => {
-      tab.setAttribute("aria-selected", i === index ? "true" : "false");
-      tab.setAttribute("tabindex", i === index ? "0" : "-1");
+      tab.setAttribute("aria-selected", i === clamped ? "true" : "false");
+      tab.setAttribute("tabindex", i === clamped ? "0" : "-1");
     });
     this.panelTargets.forEach((panel, i) => {
-      panel.hidden = i !== index;
+      panel.hidden = i !== clamped;
     });
   }
 }
