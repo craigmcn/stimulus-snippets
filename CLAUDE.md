@@ -82,7 +82,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 ### Completed
 
 - **7 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`
-- **64 tests** across 7 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- **67 tests** across 7 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
 - `@vitest/eslint-plugin` added so `describe`/`it`/`expect`/`vi` globals are recognized in test files
 - MIT LICENSE added; `CODEOWNERS` (`* @craigmcn`) added; version bumped to `1.0.0`
@@ -98,14 +98,8 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **Blanket `.catch(() => {})` retained** — the `.then()` body contains no realistic throw paths, so a narrower catch would add complexity for no benefit. The guard before the call handles the only real crash path (undefined clipboard).
 - **Docs site: monorepo in `docs/`** — Astro reads `components/*/README.md` directly; no duplicated content, no sync mechanism. Standalone npm project (not Yarn workspace) to allow `npm ci` on Cloudflare Pages.
 - **Cloudflare Pages workflow** — must use Pages (not Worker) project type. Custom domains added through Pages dashboard only, not via manual DNS. `SKIP_DEPENDENCY_INSTALL=true` required because root `yarn.lock` causes Cloudflare to auto-run `yarn install` in `docs/`.
-
-### Lower-priority follow-ups
-
-- `slug`: document that non-Latin scripts (CJK, Arabic, emoji) produce an empty string — README-only change
-- `slug`: `this.locked` has no DOM backing and resets if the controller reconnects after the output is cleared
-- `checkbox-required`: no `console.warn` when the element is not inside a `<form>` — silent no-op is confusing
-- `www.stimulus-snippets.dev`: add proxied CNAME + redirect rule to apex domain
-- `stimulus-snippets.dev` email spoofing: add `v=spf1 -all` TXT + `v=DMARC1; p=reject;` TXT records
+- **`slug` locked state uses `lockedValue`** — backed by `data-slug-locked-value` attribute so it survives controller reconnects (e.g. Turbo morphing). `connect()` only sets it when not already locked, so a reconnect with an empty output field doesn't un-lock a manually edited slug.
+- **`checkbox-required` warns when outside a form** — `console.warn` on connect when `closest("form")` returns null; submit validation silently did nothing before.
 
 ### Next components (planned)
 

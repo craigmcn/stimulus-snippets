@@ -19,6 +19,7 @@ export default [
         RegExp: "readonly",
         Event: "readonly",
         DOMException: "readonly",
+        console: "readonly",
       },
     },
     rules: {
