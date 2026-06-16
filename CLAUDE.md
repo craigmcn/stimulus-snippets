@@ -111,7 +111,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ### Open PRs (pending merge)
 
-- **PR #5** `feat/accordion-controller` — in progress
+- **PR #5** `feat/accordion-controller` — in progress; Copilot review addressed: extracted `_closePanel(index)` helper to eliminate duplicated exclusive-close logic between `connect()` and `toggle()`; PR description test count corrected (25, not 30); IME `isComposing` follow-up resolved as not actionable — triggers must be `<button>` elements so composition events cannot fire on them; if `keydown` is ever wired to a non-button element, add `if (event.isComposing) return` guard.
 
 ### Next components (planned)
 

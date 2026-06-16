@@ -31,12 +31,9 @@ export default class extends Controller {
 
     if (this.exclusiveValue) {
       const firstOpen = this.panelTargets.findIndex((p) => !p.hidden);
-      this.panelTargets.forEach((panel, i) => {
-        if (i !== firstOpen && !panel.hidden) {
-          panel.hidden = true;
-          const trigger = this.triggerTargets[i];
-          if (trigger) trigger.setAttribute("aria-expanded", "false");
-        }
+      this.panelTargets.forEach((_, i) => {
+        if (i !== firstOpen && !this.panelTargets[i].hidden)
+          this._closePanel(i);
       });
     }
   }
@@ -51,11 +48,7 @@ export default class extends Controller {
 
     if (opening && this.exclusiveValue) {
       this.panelTargets.forEach((p, i) => {
-        if (i !== index && !p.hidden) {
-          p.hidden = true;
-          const trigger = this.triggerTargets[i];
-          if (trigger) trigger.setAttribute("aria-expanded", "false");
-        }
+        if (i !== index && !p.hidden) this._closePanel(i);
       });
     }
 
@@ -89,5 +82,12 @@ export default class extends Controller {
 
     event.preventDefault();
     triggers[next].focus();
+  }
+
+  _closePanel(index) {
+    const panel = this.panelTargets[index];
+    const trigger = this.triggerTargets[index];
+    if (panel) panel.hidden = true;
+    if (trigger) trigger.setAttribute("aria-expanded", "false");
   }
 }
