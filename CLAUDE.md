@@ -81,8 +81,8 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ### Completed
 
-- **8 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`
-- **90 tests** across 8 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- **9 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`, `accordion`
+- **115 tests** across 9 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
 - `@vitest/eslint-plugin` added so `describe`/`it`/`expect`/`vi` globals are recognized in test files
 - MIT LICENSE added; `CODEOWNERS` (`* @craigmcn`) added; version bumped to `1.0.0`
@@ -91,8 +91,8 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - Branch ruleset applied to `main` via `gh` CLI (1 required review, stale-review dismissal, `check` status check, no force-push/delete)
 - **PR #1 merged** — bug fixes: `clipboard` navigator guard + timer debounce + disconnect; `checkbox-required` pristine-form init; `password-rules` RegExp guard
 - **PR #2 merged** — docs site in `docs/` (Astro 5, Cloudflare Pages, stimulus-snippets.dev); dark/light/system theme toggle; CI docs job
-- **PR #3 open** (`fix/follow-up-cleanups`) — `slug` lock DOM-backed via `lockedValue`; `slug` README non-Latin note; `checkbox-required` `console.warn` when outside form; `console` + `KeyboardEvent` added to ESLint globals
-- **PR #4 open** (`feat/tabs-controller`) — `tabs` controller: full ARIA tablist, arrow-key nav, auto ID generation; addressed code review feedback from Claude and Copilot; 90 tests total
+- **PR #3 merged** (`fix/follow-up-cleanups`) — `slug` lock DOM-backed via `lockedValue`; `slug` README non-Latin note; `checkbox-required` `console.warn` when outside form; `console` + `KeyboardEvent` added to ESLint globals
+- **PR #4 merged** (`feat/tabs-controller`) — `tabs` controller: full ARIA tablist, arrow-key nav, auto ID generation; addressed code review feedback from Claude and Copilot; 90 tests total
 - DNS/email spoofing records (`SPF`, `DMARC`, `www` redirect) resolved in Cloudflare
 
 ### Key decisions
@@ -106,15 +106,15 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **`tabs` uses `_activate()` directly from action methods** — Stimulus value callbacks fire via MutationObserver (async); calling `_activate()` directly from `select()` and `keydown()` keeps UI updates synchronous and keeps tests simple. `indexValueChanged` is kept but guarded by `this._activated` so it only fires for external programmatic changes after connect.
 - **`tabs` ID auto-generation uses module-level `uid` counter with collision check** — `do...while (document.getElementById(id))` skips any candidate already in the document; avoids `crypto.randomUUID()` churn on reconnect. On Vite HMR the counter resets but this is a development-only edge case.
 - **`tabs` `_activate` clamps index** — out-of-bounds `data-tabs-index-value` (or programmatic set) is clamped to `[0, count-1]`; guard for empty tab list. Prevents the silent broken state where all panels hide and no tab is reachable.
+- **`accordion` uses heading + button pattern, not `<details>`/`<summary>`** — `<details name>` covers single-open natively in 2026, but the ARIA accordion pattern (heading + `aria-expanded`) gives screen reader users heading-level navigation. Controller adds value where `<details>` can't: `aria-controls`/`aria-labelledby` wiring, arrow-key focus movement between triggers, and coordinated exclusive-open mode. `toggle()` called directly from action methods (not via value callback) so panel state updates are synchronous.
+- **`accordion` exclusive enforcement runs on both connect and toggle** — if the page loads with multiple panels open and `exclusive` is true, all but the first open panel are closed on connect. This normalizes authoring mistakes without requiring JS-only initialization.
 
 ### Open PRs (pending merge)
 
-- **PR #3** `fix/follow-up-cleanups` — ready to merge
-- **PR #4** `feat/tabs-controller` — ready to merge; merge PR #3 first to avoid CLAUDE.md conflict
+- **PR #5** `feat/accordion-controller` — in progress
 
 ### Next components (planned)
 
-1. `accordion` — `aria-expanded` + optional single-open mode
-2. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
-3. `file-preview` — thumbnail/filename before form submit (no canonical package)
-4. `dependent-select` — client-side Country→State filtering
+1. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
+2. `file-preview` — thumbnail/filename before form submit (no canonical package)
+3. `dependent-select` — client-side Country→State filtering
