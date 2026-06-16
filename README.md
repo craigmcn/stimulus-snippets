@@ -46,6 +46,7 @@ pin "controllers/dismiss_controller", to: "controllers/dismiss_controller.js"
 | [password-rules](components/password-rules/)       | Real-time rule-by-rule password strength feedback                         |
 | [checkbox-required](components/checkbox-required/) | Require at least N checkboxes in a group to be checked before form submit |
 | [slug](components/slug/)                           | Auto-populate a URL slug field from a source field as the user types      |
+| [tabs](components/tabs/)                           | Tab panel switcher with ARIA tablist pattern and arrow-key navigation     |
 
 ---
 

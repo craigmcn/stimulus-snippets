@@ -81,8 +81,8 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ### Completed
 
-- **7 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`
-- **67 tests** across 7 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- **8 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`
+- **85 tests** across 8 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
 - `@vitest/eslint-plugin` added so `describe`/`it`/`expect`/`vi` globals are recognized in test files
 - MIT LICENSE added; `CODEOWNERS` (`* @craigmcn`) added; version bumped to `1.0.0`
@@ -91,6 +91,9 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - Branch ruleset applied to `main` via `gh` CLI (1 required review, stale-review dismissal, `check` status check, no force-push/delete)
 - **PR #1 merged** — bug fixes: `clipboard` navigator guard + timer debounce + disconnect; `checkbox-required` pristine-form init; `password-rules` RegExp guard
 - **PR #2 merged** — docs site in `docs/` (Astro 5, Cloudflare Pages, stimulus-snippets.dev); dark/light/system theme toggle; CI docs job
+- **PR #3 open** (`fix/follow-up-cleanups`) — `slug` lock DOM-backed via `lockedValue`; `slug` README non-Latin note; `checkbox-required` `console.warn` when outside form; `console` + `KeyboardEvent` added to ESLint globals
+- **PR #4 open** (`feat/tabs-controller`) — `tabs` controller: full ARIA tablist, arrow-key nav, auto ID generation, 20 tests
+- DNS/email spoofing records (`SPF`, `DMARC`, `www` redirect) resolved in Cloudflare
 
 ### Key decisions
 
@@ -100,11 +103,17 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **Cloudflare Pages workflow** — must use Pages (not Worker) project type. Custom domains added through Pages dashboard only, not via manual DNS. `SKIP_DEPENDENCY_INSTALL=true` required because root `yarn.lock` causes Cloudflare to auto-run `yarn install` in `docs/`.
 - **`slug` locked state uses `lockedValue`** — backed by `data-slug-locked-value` attribute so it survives controller reconnects (e.g. Turbo morphing). `connect()` only sets it when not already locked, so a reconnect with an empty output field doesn't un-lock a manually edited slug.
 - **`checkbox-required` warns when outside a form** — `console.warn` on connect when `closest("form")` returns null; submit validation silently did nothing before.
+- **`tabs` uses `_activate()` directly from action methods** — Stimulus value callbacks fire via MutationObserver (async); calling `_activate()` directly from `select()` and `keydown()` keeps UI updates synchronous and keeps tests simple. `indexValueChanged` is kept but guarded by `this._activated` so it only fires for external programmatic changes after connect.
+- **`tabs` ID auto-generation uses module-level `uid` counter** — avoids `crypto.randomUUID()` churn on reconnect; IDs are stable within a page session. On Vite HMR the counter resets but this is a development-only edge case.
+
+### Open PRs (pending merge)
+
+- **PR #3** `fix/follow-up-cleanups` — ready to merge
+- **PR #4** `feat/tabs-controller` — ready to merge; merge PR #3 first to avoid CLAUDE.md conflict
 
 ### Next components (planned)
 
-1. `tabs` — full ARIA tablist + arrow-key navigation (gap in existing packages)
-2. `accordion` — `aria-expanded` + optional single-open mode
-3. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
-4. `file-preview` — thumbnail/filename before form submit (no canonical package)
-5. `dependent-select` — client-side Country→State filtering
+1. `accordion` — `aria-expanded` + optional single-open mode
+2. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
+3. `file-preview` — thumbnail/filename before form submit (no canonical package)
+4. `dependent-select` — client-side Country→State filtering
