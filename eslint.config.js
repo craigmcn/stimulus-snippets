@@ -18,6 +18,7 @@ export default [
         parseInt: "readonly",
         RegExp: "readonly",
         Event: "readonly",
+        KeyboardEvent: "readonly",
         DOMException: "readonly",
       },
     },
