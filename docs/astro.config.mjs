@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
 
 function remarkRewriteControllerLinks() {
   return (tree) => {
@@ -21,6 +22,7 @@ function remarkRewriteControllerLinks() {
 
 export default defineConfig({
   site: "https://stimulus-snippets.dev",
+  integrations: [sitemap()],
   server: { port: 3130 },
   markdown: {
     remarkPlugins: [remarkRewriteControllerLinks],
