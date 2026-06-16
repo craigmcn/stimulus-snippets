@@ -96,10 +96,11 @@ Add `role="tablist"` and an `aria-label` (or `aria-labelledby`) to the wrapper e
 
 Keyboard behaviour (while a tab button has focus):
 
-| Key          | Action                                |
-| ------------ | ------------------------------------- |
-| `ArrowRight` | Move to and activate the next tab     |
-| `ArrowLeft`  | Move to and activate the previous tab |
-| `Home`       | Move to and activate the first tab    |
-| `End`        | Move to and activate the last tab     |
-| `Tab`        | Move focus into the active panel      |
+| Key             | Action                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| `ArrowRight`    | Move to and activate the next tab                                                               |
+| `ArrowLeft`     | Move to and activate the previous tab                                                           |
+| `Home`          | Move to and activate the first tab                                                              |
+| `End`           | Move to and activate the last tab                                                               |
+| `Enter`/`Space` | Activate the focused tab (native `<button>` behaviour — fires `click`, which triggers `select`) |
+| `Tab`           | Move focus into the active panel                                                                |

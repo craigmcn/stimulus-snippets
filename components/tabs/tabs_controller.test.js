@@ -243,4 +243,21 @@ describe("TabsController", () => {
       );
     });
   });
+
+  describe("programmatic indexValue change", () => {
+    it("switches the active tab when indexValue is set externally", async () => {
+      await setup();
+      const controller = application.getControllerForElementAndIdentifier(
+        document.getElementById("widget"),
+        "tabs",
+      );
+      controller.indexValue = 2;
+      await tick();
+      expect(document.getElementById("t2").getAttribute("aria-selected")).toBe(
+        "true",
+      );
+      expect(document.getElementById("p2").hidden).toBe(false);
+      expect(document.getElementById("p0").hidden).toBe(true);
+    });
+  });
 });

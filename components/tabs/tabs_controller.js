@@ -44,6 +44,7 @@ export default class extends Controller {
   keydown(event) {
     const tabs = this.tabTargets;
     const current = tabs.indexOf(event.currentTarget);
+    if (current === -1) return;
     const count = tabs.length;
     let next;
 
