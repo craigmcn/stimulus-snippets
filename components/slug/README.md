@@ -39,7 +39,9 @@ application.register("slug", SlugController);
 </div>
 ```
 
-Once the user manually edits the output field, auto-generation stops. If the output already has a value when the controller connects (e.g. on an edit form), it starts locked.
+Once the user manually edits the output field, auto-generation stops. If the output already has a value when the controller connects (e.g. on an edit form), it starts locked. The locked state is stored in a `data-slug-locked-value` attribute on the controller element, so it survives controller reconnects (e.g. Turbo morphing).
+
+> **Note:** Only Latin-based characters are supported. Non-Latin scripts (CJK, Arabic, Hebrew, emoji, etc.) are stripped entirely and produce an empty slug. If your titles may contain non-Latin text, apply a server-side transliteration step before or after the slug is submitted.
 
 ## API
 
@@ -52,7 +54,9 @@ Once the user manually edits the output field, auto-generation stops. If the out
 
 ### Values
 
-None.
+| Value    | Type    | Default | Description                                                                                                                                                                                                                                     |
+| -------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `locked` | Boolean | `false` | When `true`, auto-generation is disabled. Stored as `data-slug-locked-value` on the controller element; survives controller reconnects. Set by the controller on connect (if the output is pre-filled) or when the user edits the output field. |
 
 ### Actions
 

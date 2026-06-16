@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import CheckboxRequiredController from "./checkbox_required_controller";
 
@@ -158,5 +158,18 @@ describe("CheckboxRequiredController", () => {
     `);
     expect(() => submitForm()).not.toThrow();
     expect(submitForm().defaultPrevented).toBe(true);
+  });
+
+  it("warns when the controller element is not inside a form", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await setup(`
+      <div data-controller="checkbox-required">
+        <input type="checkbox" id="a" data-checkbox-required-target="checkbox">
+      </div>
+    `);
+    expect(warn).toHaveBeenCalledWith(
+      "[checkbox-required] controller element is not inside a <form>; submit validation will not work.",
+    );
+    warn.mockRestore();
   });
 });

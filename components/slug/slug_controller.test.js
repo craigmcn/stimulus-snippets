@@ -36,6 +36,12 @@ describe("toSlug", () => {
   it("returns an empty string for empty input", () => {
     expect(toSlug("")).toBe("");
   });
+
+  it("returns an empty string for non-Latin scripts (CJK, Arabic, emoji)", () => {
+    expect(toSlug("日本語")).toBe("");
+    expect(toSlug("العربية")).toBe("");
+    expect(toSlug("🎉")).toBe("");
+  });
 });
 
 describe("SlugController", () => {
@@ -108,5 +114,33 @@ describe("SlugController", () => {
     source.dispatchEvent(new Event("input"));
 
     expect(output.value).toBe("existing-slug");
+  });
+
+  it("remains locked through a reconnect even when the output is empty", async () => {
+    await setup(`
+      <div data-controller="slug">
+        <input id="source" data-slug-target="source" data-action="input->slug#generate">
+        <input id="output" data-slug-target="output" data-action="input->slug#lock">
+      </div>
+    `);
+
+    const source = document.getElementById("source");
+    const output = document.getElementById("output");
+    const el = document.querySelector("[data-controller='slug']");
+
+    output.value = "my-custom-slug";
+    output.dispatchEvent(new Event("input"));
+
+    // Simulate reconnect with output cleared (e.g. Turbo morph)
+    el.removeAttribute("data-controller");
+    await tick();
+    output.value = "";
+    el.setAttribute("data-controller", "slug");
+    await tick();
+
+    source.value = "New Title";
+    source.dispatchEvent(new Event("input"));
+
+    expect(output.value).toBe("");
   });
 });
