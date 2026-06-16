@@ -2,19 +2,26 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   static targets = ["source", "output"];
+  static values = { locked: { type: Boolean, default: false } };
 
   connect() {
-    this.locked = this.hasOutputTarget && this.outputTarget.value !== "";
+    if (
+      !this.lockedValue &&
+      this.hasOutputTarget &&
+      this.outputTarget.value !== ""
+    ) {
+      this.lockedValue = true;
+    }
   }
 
   generate() {
-    if (this.locked) return;
+    if (this.lockedValue) return;
     if (!this.hasSourceTarget || !this.hasOutputTarget) return;
     this.outputTarget.value = toSlug(this.sourceTarget.value);
   }
 
   lock() {
-    this.locked = true;
+    this.lockedValue = true;
   }
 }
 

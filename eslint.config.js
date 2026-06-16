@@ -20,6 +20,7 @@ export default [
         Event: "readonly",
         KeyboardEvent: "readonly",
         DOMException: "readonly",
+        console: "readonly",
       },
     },
     rules: {

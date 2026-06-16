@@ -9,6 +9,10 @@ export default class extends Controller {
     if (this._form) {
       this._submitHandler = (event) => this.validate(event);
       this._form.addEventListener("submit", this._submitHandler);
+    } else {
+      console.warn(
+        "[checkbox-required] controller element is not inside a <form>; submit validation will not work.",
+      );
     }
     this._initValid();
   }
