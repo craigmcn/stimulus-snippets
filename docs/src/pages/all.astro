@@ -8,10 +8,10 @@ const items = await Promise.all(
   components
     .map(parseComponent)
     .sort((a, b) => a.name.localeCompare(b.name))
-    .map(async ({ slug, name, description }) => {
+    .map(async ({ slug, name }) => {
       const entry = components.find((c) => c.id.split('/')[0] === slug)!;
       const { Content } = await render(entry);
-      return { slug, name, description, Content };
+      return { slug, name, Content };
     })
 );
 ---
@@ -32,9 +32,9 @@ const items = await Promise.all(
       </ul>
     </nav>
     {
-      items.map(({ slug, name, Content }) => (
+      items.map(({ slug, name, Content }, i) => (
         <section id={slug}>
-          <hr />
+          {i > 0 && <hr />}
           <Content />
         </section>
       ))

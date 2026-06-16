@@ -14,7 +14,7 @@ export async function GET() {
     "",
     "## What this is",
     "",
-    "stimulus-snippets provides standalone, zero-dependency Stimulus JS controllers that Rails developers can copy directly into their apps/javascript/controllers/ directory. Each controller is a single file with no build step required.",
+    "stimulus-snippets provides standalone, zero-dependency Stimulus JS controllers that Rails developers can copy directly into their app/javascript/controllers/ directory. Each controller is a single file with no build step required.",
     "",
     "## Controllers",
     "",

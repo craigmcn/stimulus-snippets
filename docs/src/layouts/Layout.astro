@@ -11,31 +11,33 @@ const navItems = allComponents
   .map(parseComponent)
   .sort((a, b) => a.name.localeCompare(b.name));
 
-const siteUrl = 'https://stimulus-snippets.dev';
+const siteUrl = Astro.site?.origin ?? 'https://stimulus-snippets.dev';
 const pageUrl = new URL(Astro.url.pathname, siteUrl).href;
 const pageTitle = title ? `${title} — stimulus-snippets` : 'stimulus-snippets — Stimulus JS Controllers for Rails';
 const ogTitle = title ? `${title} — Stimulus JS` : 'stimulus-snippets — Stimulus JS Controllers for Rails';
 
-const jsonLd = currentSlug
-  ? JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'TechArticle',
-      name: title,
-      description,
-      url: pageUrl,
-      isPartOf: {
+const jsonLd = (
+  currentSlug
+    ? JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        name: title,
+        description,
+        url: pageUrl,
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'stimulus-snippets',
+          url: siteUrl,
+        },
+      })
+    : JSON.stringify({
+        '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: 'stimulus-snippets',
+        description,
         url: siteUrl,
-      },
-    })
-  : JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: 'stimulus-snippets',
-      description,
-      url: siteUrl,
-    });
+      })
+).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -89,6 +91,19 @@ const jsonLd = currentSlug
                   </li>
                 ))
               }
+            </ul>
+          </nav>
+          <nav aria-label="More">
+            <ul>
+              <li>
+                <a
+                  href="/all"
+                  class:list={['nav-link', { active: currentSlug === 'all' }]}
+                  aria-current={currentSlug === 'all' ? 'page' : undefined}
+                >
+                  All controllers
+                </a>
+              </li>
             </ul>
           </nav>
           <div class="sidebar-footer">
