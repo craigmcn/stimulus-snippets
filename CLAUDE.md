@@ -81,8 +81,8 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ### Completed
 
-- **9 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`, `accordion`
-- **115 tests** across 9 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- **10 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`, `accordion`, `form-confirm`
+- **122 tests** across 10 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
 - `@vitest/eslint-plugin` added so `describe`/`it`/`expect`/`vi` globals are recognized in test files
 - MIT LICENSE added; `CODEOWNERS` (`* @craigmcn`) added; version bumped to `1.0.0`
@@ -94,6 +94,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **PR #3 merged** (`fix/follow-up-cleanups`) — `slug` lock DOM-backed via `lockedValue`; `slug` README non-Latin note; `checkbox-required` `console.warn` when outside form; `console` + `KeyboardEvent` added to ESLint globals
 - **PR #4 merged** (`feat/tabs-controller`) — `tabs` controller: full ARIA tablist, arrow-key nav, auto ID generation; addressed code review feedback from Claude and Copilot; 90 tests total
 - **PR #5 merged** (`feat/accordion-controller`) — `accordion` controller: ARIA disclosure pattern, arrow-key nav, exclusive-open mode; `_closePanel(index)` helper extracted per Copilot review; 115 tests total
+- **PR #6 merged** (`feat/seo-discoverability`) — SEO and AI discoverability improvements to `docs/`
 - DNS/email spoofing records (`SPF`, `DMARC`, `www` redirect) resolved in Cloudflare
 
 ### Key decisions
@@ -111,13 +112,22 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **`accordion` exclusive enforcement runs on both connect and toggle** — if the page loads with multiple panels open and `exclusive` is true, all but the first open panel are closed on connect. This normalizes authoring mistakes without requiring JS-only initialization.
 - **Docs SEO/discoverability: `@astrojs/sitemap` + OG/JSON-LD + `/llms.txt` + `/all`** — sitemap auto-generated at build; OG/Twitter/JSON-LD (`WebSite` on home, `TechArticle` on controller pages) in `Layout.astro`; `/llms.txt` is a dynamic Astro endpoint (auto-updates as controllers are added); `/all` renders all READMEs in one page for LLM single-request reads. JSON-LD uses `Astro.site?.origin` (not a hardcoded string) and escapes `<` as `<` to prevent `</script>` breakout. Distribution tactics (community links, GitHub Topics) intentionally deferred.
 
-### Open PRs (pending merge)
-
-- **PR #6** (`feat/seo-discoverability`) — SEO and AI discoverability improvements to `docs/`; Claude + Copilot review addressed (Astro.site, XSS escape, sidebar /all link, hr fix, unused var, Rails path typo, engines.node floor)
+- **`form-confirm` uses a single `_allowed` re-entry guard, not a separate "real" event** — `intercept()` preventDefault's and opens the dialog; `proceed()` sets the guard then calls `requestSubmit()`/`click()` on the original source element, so the same listener sees the replay and lets it through. Works for both form `submit` and link/button `click` without Turbo-specific code. Documented limitation: Turbo's `data-turbo-method` links bypass native form submission entirely, so they need `Turbo.setConfirmMethod()` instead — out of scope for a vanilla Stimulus controller.
 
 ### Next components (planned)
 
-1. `autogrow` — textarea that grows to fit content as the user types
-2. `form-confirm` — `<dialog>`-based replacement for Rails 7's removed `data-confirm`
-3. `file-preview` — thumbnail/filename before form submit (no canonical package)
-4. `dependent-select` — client-side Country→State filtering
+1. `file-preview` — thumbnail/filename before form submit (no canonical package)
+2. `dependent-select` — client-side Country→State filtering
+
+### Candidate components (researched, not yet planned)
+
+Checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com (a paid component-library site whose pages only list category groupings, not concrete implementations) to avoid duplicating the README's "Well-covered elsewhere" list. None of these overlap shipped, planned, or well-covered-elsewhere controllers:
+
+- `search-filter` — client-side filter of a list/table as the user types. Low effort, high value.
+- `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
+- `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
+- `datetime-local` — converts a server-rendered UTC timestamp to the viewer's local time for display. Low-medium effort, high value.
+- `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
+- `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
+- `infinite-scroll` — loads the next page of a paginated/Turbo Stream list on scroll. Medium effort, medium value (Rails apps often prefer Turbo Frames/pagy links instead).
+- `print-button` — triggers `window.print()`, optionally toggling print-only content first. Low effort, low-medium value (borderline whether it's worth a controller).
