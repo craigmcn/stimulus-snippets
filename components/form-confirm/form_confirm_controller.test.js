@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import FormConfirmController from "./form_confirm_controller";
 
@@ -59,10 +59,20 @@ describe("FormConfirmController", () => {
     it("prevents the initial submit and opens the dialog", async () => {
       await setup(FORM_HTML);
       const form = document.getElementById("form");
-      const submitSpy = vi.fn((e) => e.preventDefault());
-      form.addEventListener("submit", submitSpy);
+      form.addEventListener("submit", (e) => e.preventDefault());
 
-      document.getElementById("form").querySelector("button").click();
+      form.querySelector("button").click();
+
+      expect(document.querySelector("dialog").open).toBe(true);
+    });
+
+    it("does not throw or reopen the dialog when intercept fires again while already open", async () => {
+      await setup(FORM_HTML);
+      const form = document.getElementById("form");
+      form.addEventListener("submit", (e) => e.preventDefault());
+
+      form.querySelector("button").click();
+      expect(() => form.querySelector("button").click()).not.toThrow();
 
       expect(document.querySelector("dialog").open).toBe(true);
     });

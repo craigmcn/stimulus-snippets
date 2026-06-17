@@ -46,6 +46,7 @@ export default class extends Controller {
   }
 
   _open() {
+    if (this.dialogTarget.open) return;
     if (typeof this.dialogTarget.showModal === "function") {
       this.dialogTarget.showModal();
     } else {
