@@ -77,12 +77,14 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ---
 
-## Progress — 2026-06-16
+## Progress — 2026-06-17
 
 ### Completed
 
 - **10 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`, `accordion`, `form-confirm`
-- **122 tests** across 10 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- **123 tests** across 10 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- `form-confirm` controller built (`<dialog>`-based replacement for Rails 7's removed `data-confirm`); PR #7 opened, self-reviewed, one real bug found and fixed before merge (see Key decisions)
+- Researched and recorded 8 candidate components for future work (see "Candidate components" below), checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com for overlap
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
 - `@vitest/eslint-plugin` added so `describe`/`it`/`expect`/`vi` globals are recognized in test files
 - MIT LICENSE added; `CODEOWNERS` (`* @craigmcn`) added; version bumped to `1.0.0`
@@ -113,6 +115,11 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **Docs SEO/discoverability: `@astrojs/sitemap` + OG/JSON-LD + `/llms.txt` + `/all`** — sitemap auto-generated at build; OG/Twitter/JSON-LD (`WebSite` on home, `TechArticle` on controller pages) in `Layout.astro`; `/llms.txt` is a dynamic Astro endpoint (auto-updates as controllers are added); `/all` renders all READMEs in one page for LLM single-request reads. JSON-LD uses `Astro.site?.origin` (not a hardcoded string) and escapes `<` as `<` to prevent `</script>` breakout. Distribution tactics (community links, GitHub Topics) intentionally deferred.
 
 - **`form-confirm` uses a single `_allowed` re-entry guard, not a separate "real" event** — `intercept()` preventDefault's and opens the dialog; `proceed()` sets the guard then calls `requestSubmit()`/`click()` on the original source element, so the same listener sees the replay and lets it through. Works for both form `submit` and link/button `click` without Turbo-specific code. Documented limitation: Turbo's `data-turbo-method` links bypass native form submission entirely, so they need `Turbo.setConfirmMethod()` instead — out of scope for a vanilla Stimulus controller.
+- **`form-confirm` guards against double `showModal()` calls** — calling `showModal()` on an already-open `<dialog>` throws `InvalidStateError` in real browsers; this path is invisible to the test suite since jsdom doesn't implement `showModal` at all (confirmed by direct probe, not just absence in test output). `_open()` now checks `this.dialogTarget.open` first. Found via self-review of PR #7 before merge, not via test failure — worth remembering that this controller's dialog-open path is structurally undertested in jsdom and needs reasoning about real-browser behavior directly.
+
+### Open PRs (pending merge)
+
+- **PR #7** (`feat/form-confirm-controller`) — `form-confirm` controller; pushed and self-reviewed, showModal double-open guard fixed in a follow-up commit
 
 ### Next components (planned)
 
