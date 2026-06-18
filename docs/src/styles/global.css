@@ -384,6 +384,7 @@ nav ul {
 .prose pre {
   margin: 1.25rem 0;
   padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   overflow-x: auto;
   line-height: 1.6;
@@ -400,6 +401,12 @@ nav ul {
   border-radius: 0.25rem;
   color: var(--inline-code-text);
   font-size: 0.875em;
+}
+
+/* Shiki's light theme background matches the page background — give it contrast */
+.astro-code,
+.astro-code span {
+  background-color: var(--inline-code-bg) !important;
 }
 
 /* Shiki dual-theme: activate dark variant on system dark */

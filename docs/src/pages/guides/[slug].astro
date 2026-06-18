@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import { parseComponent } from '../../utils/component.js';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides');
+  return guides.map((entry) => ({
+    params: { slug: entry.id.replace(/\.md$/, '') },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { name, description } = parseComponent(entry);
+const slug = entry.id.replace(/\.md$/, '');
+---
+
+<Layout title={name} description={description} currentSlug={`guides/${slug}`}>
+  <article class="prose">
+    <Content />
+  </article>
+</Layout>
