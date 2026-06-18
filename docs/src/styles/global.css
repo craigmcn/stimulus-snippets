@@ -459,6 +459,8 @@ nav ul {
   border-collapse: collapse;
   font-size: 0.875rem;
   margin: 1.25rem 0;
+  display: block;
+  overflow-x: auto;
 }
 
 .prose th {
@@ -544,11 +546,5 @@ nav ul {
 
   .theme-toggle button {
     padding: 0.25rem;
-  }
-
-  /* Long API-table header labels can force the table wider than the
-     viewport; allow them to wrap instead of pushing the page out. */
-  .prose th {
-    white-space: normal;
   }
 }
