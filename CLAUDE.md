@@ -105,7 +105,9 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **PR #8 merged** (`feat/mustard-accent`) — the above mustard accent + favicon changes
 - New "Setting up Rails with Stimulus" guide added (`docs/src/content/guides/getting-started.md`) — covers new vs. existing Rails apps, importmap vs. `jsbundling-rails` install paths, verifying the install, copying/registering a controller, smoke-testing, and common gotchas; new `guides` content collection + `/guides/[slug]` route + sidebar nav section; linked from root README's "How to use"
 - Fixed `<pre>` code blocks blending into the page background in light mode — Shiki's light theme background (`#fff`) matched the page background exactly; forced a light-gray background (`var(--inline-code-bg)`) and added a subtle border in both themes for definition
-- **PR #9 opened** (`docs/rails-setup-guide`) — the above guide + light-mode contrast fix; reviewed (one wording fix applied, no other issues found)
+- **PR #9 merged** (`docs/rails-setup-guide`) — the above guide + light-mode contrast fix
+- Full-codebase review from a senior-Rails-developer perspective (all 10 controllers + docs): found one real bug (`form-confirm` submitter loss, see Key decisions) and two getting-started-guide gaps (layout script-tag check, CSP/importmap nonce gotcha) — both doc gaps folded into the same fix
+- **PR #10 merged** (`fix/form-confirm-submitter`) — submitter-preservation fix + new multi-submit-button test (124 tests total) + the two guide additions above
 
 ### Key decisions
 
@@ -124,11 +126,12 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 - **`form-confirm` uses a single `_allowed` re-entry guard, not a separate "real" event** — `intercept()` preventDefault's and opens the dialog; `proceed()` sets the guard then calls `requestSubmit()`/`click()` on the original source element, so the same listener sees the replay and lets it through. Works for both form `submit` and link/button `click` without Turbo-specific code. Documented limitation: Turbo's `data-turbo-method` links bypass native form submission entirely, so they need `Turbo.setConfirmMethod()` instead — out of scope for a vanilla Stimulus controller.
 - **`form-confirm` guards against double `showModal()` calls** — calling `showModal()` on an already-open `<dialog>` throws `InvalidStateError` in real browsers; this path is invisible to the test suite since jsdom doesn't implement `showModal` at all (confirmed by direct probe, not just absence in test output). `_open()` now checks `this.dialogTarget.open` first. Found via self-review of PR #7 before merge, not via test failure — worth remembering that this controller's dialog-open path is structurally undertested in jsdom and needs reasoning about real-browser behavior directly.
+- **`form-confirm` preserves the clicked submit button across resubmit** — `requestSubmit()` with no argument resubmits via the form's default submitter, silently dropping which button was clicked. Broke the common Rails multi-submit-button pattern (`form.button "Save"` / `form.button "Save and add another"` sharing a `commit` name) — wrong value would reach the server after confirming. Fixed by capturing `event.submitter` in `intercept()` and passing it to `requestSubmit(submitter)` in `proceed()`. Found via a full-codebase senior-Rails-dev review (PR #10), not a test failure — same class of "real browser behavior, not exercised by the existing test fixtures" gap as the `showModal()` bug above.
 - **Docs accent: mustard over maroon** — both were prototyped live in the dev server (swapping CSS variable values) before picking; mustard read as more distinctive than blue without the "alarm/error" connotation maroon risked. Decided via direct visual comparison, not by description alone.
 
 ### Open PRs (pending merge)
 
-- PR #9 (`docs/rails-setup-guide`) — Rails + Stimulus setup guide, `guides` content collection, light-mode code block contrast fix
+- None — PR #10 (`fix/form-confirm-submitter`) merged 2026-06-17
 
 ### Next components (planned)
 
