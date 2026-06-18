@@ -75,6 +75,20 @@ const jsonLd = (
           <a href="/" class="logo">
             <span class="logo-primary">stimulus</span><span class="logo-secondary">-snippets</span>
           </a>
+          <nav aria-label="Guides">
+            <p class="nav-label">Guides</p>
+            <ul>
+              <li>
+                <a
+                  href="/guides/getting-started"
+                  class:list={['nav-link', { active: currentSlug === 'guides/getting-started' }]}
+                  aria-current={currentSlug === 'guides/getting-started' ? 'page' : undefined}
+                >
+                  Setting up Rails with Stimulus
+                </a>
+              </li>
+            </ul>
+          </nav>
           <nav aria-label="Components">
             <p class="nav-label">Components</p>
             <ul>

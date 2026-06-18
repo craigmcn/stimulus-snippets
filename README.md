@@ -13,6 +13,8 @@ Copy-pasteable Stimulus JS controllers for Ruby on Rails. Inspired by [shadcn/ui
 
 ## How to use
 
+These controllers assume Stimulus is already running in your Rails app — true by default since Rails 7 (`stimulus-rails` + `importmap-rails`). On an older app or a `jsbundling-rails` setup, see [Setting up Rails with Stimulus](https://stimulus-snippets.dev/guides/getting-started) first.
+
 1. Copy the controller file to `app/javascript/controllers/`.
 2. Register it in your controller index.
 3. Add `data-controller` and `data-action` attributes to your HTML.

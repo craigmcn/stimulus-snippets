@@ -10,4 +10,8 @@ const components = defineCollection({
   loader: glob({ pattern: "*/README.md", base: componentsBase }),
 });
 
-export const collections = { components };
+const guides = defineCollection({
+  loader: glob({ pattern: "*.md", base: join(dir, "guides") }),
+});
+
+export const collections = { components, guides };
