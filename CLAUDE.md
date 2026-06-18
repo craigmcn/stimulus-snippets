@@ -78,12 +78,14 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ---
 
-## Progress — 2026-06-17
+## Progress — 2026-06-18
 
 ### Completed
 
-- **10 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`, `accordion`, `form-confirm`
-- **123 tests** across 10 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- **11 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`, `accordion`, `form-confirm`, `search-filter`
+- **135 tests** across 11 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
+- `search-filter` controller built — filters `item` targets against an `input` target's value via substring match on `textContent` (or an opt-in `data-search-filter-term` override), hides non-matches with the native `hidden` attribute, optional `empty` target gets `aria-live="polite"` auto-applied; 11 tests, README, Components table row
+- **PR #12 merged** (`feat/search-filter-controller`) — the above; self-reviewed via `/review`, no blocking issues found
 - `form-confirm` controller built (`<dialog>`-based replacement for Rails 7's removed `data-confirm`); PR #7 merged, self-reviewed, one real bug found and fixed before merge (see Key decisions)
 - Researched and recorded 8 candidate components for future work (see "Candidate components" below), checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com for overlap
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
@@ -108,6 +110,8 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **PR #9 merged** (`docs/rails-setup-guide`) — the above guide + light-mode contrast fix
 - Full-codebase review from a senior-Rails-developer perspective (all 10 controllers + docs): found one real bug (`form-confirm` submitter loss, see Key decisions) and two getting-started-guide gaps (layout script-tag check, CSP/importmap nonce gotcha) — both doc gaps folded into the same fix
 - **PR #10 merged** (`fix/form-confirm-submitter`) — submitter-preservation fix + new multi-submit-button test (124 tests total) + the two guide additions above
+- Docs site mobile/tablet responsive review: sidebar nav now collapses behind a hamburger toggle (`.sidebar-toggle`, `aria-expanded`) below 768px instead of stacking fully above content; added `nav + nav` margin so Guides/Components/All sections have visible separation; GitHub link + theme toggle shrunk and laid out as a compact row on mobile instead of full-width blocks; `.prose th { white-space: normal }` on mobile to stop API table headers from forcing horizontal page scroll
+- **PR #13 opened** (`fix/mobile-docs-nav`) — the above mobile nav/table fixes
 
 ### Key decisions
 
@@ -128,10 +132,13 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **`form-confirm` guards against double `showModal()` calls** — calling `showModal()` on an already-open `<dialog>` throws `InvalidStateError` in real browsers; this path is invisible to the test suite since jsdom doesn't implement `showModal` at all (confirmed by direct probe, not just absence in test output). `_open()` now checks `this.dialogTarget.open` first. Found via self-review of PR #7 before merge, not via test failure — worth remembering that this controller's dialog-open path is structurally undertested in jsdom and needs reasoning about real-browser behavior directly.
 - **`form-confirm` preserves the clicked submit button across resubmit** — `requestSubmit()` with no argument resubmits via the form's default submitter, silently dropping which button was clicked. Broke the common Rails multi-submit-button pattern (`form.button "Save"` / `form.button "Save and add another"` sharing a `commit` name) — wrong value would reach the server after confirming. Fixed by capturing `event.submitter` in `intercept()` and passing it to `requestSubmit(submitter)` in `proceed()`. Found via a full-codebase senior-Rails-dev review (PR #10), not a test failure — same class of "real browser behavior, not exercised by the existing test fixtures" gap as the `showModal()` bug above.
 - **Docs accent: mustard over maroon** — both were prototyped live in the dev server (swapping CSS variable values) before picking; mustard read as more distinctive than blue without the "alarm/error" connotation maroon risked. Decided via direct visual comparison, not by description alone.
+- **`search-filter` plural-target iteration, no debounce** — `itemTargets` (plural) is always a safe empty-array default, so `filter()` needs no `hasItemTarget` guard before iterating; only the singular `inputTarget` access is guarded. No debounce added on the `input` action — full re-filter on every keystroke is cheap for typical Rails-page list sizes; flagged in review as a known scaling boundary, not a defect, consistent with the project's no-premature-complexity stance.
+- **Solved the headless-Chromium sandbox blocker — `channel: 'chrome'` instead of Playwright's bundled download.** Playwright's own Chromium download carries the macOS quarantine flag and fails to launch from a sandboxed shell (`spawn ... -88`); stripping quarantine is a denied security-weakening action. Launching against the already-Gatekeeper-cleared system Chrome (`chromium.launch({ channel: 'chrome' })`) sidesteps it entirely, no permission changes needed. Built a reusable global helper at `~/.claude/scripts/playwright-chrome/screenshot.js` (generic: takes URL/width/height/outfile/`--click`/`--full-page`, prints `horizontalScroll` + console errors as JSON) so this works across all projects, not just this one. Documented as a project skill at `docs/.claude/skills/screenshot-mobile/SKILL.md` so future sessions in this repo find it automatically via the `run` skill's project-skill lookup.
+- **First mobile-nav fix attempt was verified only by static analysis and shipped a wrong root-cause guess** — without a real screenshot, guessed the horizontal-scroll cause was API-table `<th>` `white-space: nowrap` and added `white-space: normal` on mobile. Once the screenshot tooling above was built and used for real, this turned out to be wrong: actual cause was an unbreakable inline `<code>` token (e.g. `successDuration`) in a table _body_ cell forcing the table past viewport width — headers were never the problem. Real fix: `.prose table { display: block; overflow-x: auto; }` (mirrors the existing `.prose pre` overflow pattern), and the `th` mobile override was removed as ineffective. **Lesson: static CSS analysis caught the symptom category but guessed the wrong element; a real rendered screenshot found the actual offending node in one pass** — worth always reaching for the real browser check before describing a CSS-overflow fix as done.
 
 ### Open PRs (pending merge)
 
-- None — PR #10 (`fix/form-confirm-submitter`) merged 2026-06-17
+- **PR #13** (`fix/mobile-docs-nav`) — docs site mobile nav collapse, section spacing, de-emphasized GitHub/theme controls, table-header wrap fix; open, pending review
 
 ### Next components (planned)
 
@@ -142,7 +149,6 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 Checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com (a paid component-library site whose pages only list category groupings, not concrete implementations) to avoid duplicating the README's "Well-covered elsewhere" list. None of these overlap shipped, planned, or well-covered-elsewhere controllers:
 
-- `search-filter` — client-side filter of a list/table as the user types. Low effort, high value.
 - `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
 - `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
 - `datetime-local` — converts a server-rendered UTC timestamp to the viewer's local time for display. Low-medium effort, high value.
