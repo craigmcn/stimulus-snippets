@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import FilePreviewController from "./file_preview_controller";
 
@@ -26,6 +26,7 @@ describe("FilePreviewController", () => {
           data-file-preview-target="input"
           data-action="change->file-preview#preview"
         />
+        <button type="button" data-action="file-preview#clear">Clear</button>
         <ul data-file-preview-target="list"></ul>
         ${extra}
       </div>
@@ -140,15 +141,49 @@ describe("FilePreviewController", () => {
 
       const input = document.querySelector("input");
       Object.defineProperty(input, "files", { value: [], configurable: true });
-      application
-        .getControllerForElementAndIdentifier(
-          document.querySelector("[data-controller]"),
-          "file-preview",
-        )
-        .clear();
+      document.querySelector("button").click();
 
       expect(input.value).toBe("");
       expect(document.querySelectorAll("li")).toHaveLength(0);
+    });
+  });
+
+  describe("object URL lifecycle", () => {
+    it("revokes the previous object URL when re-rendering", async () => {
+      await setup();
+      const revokeSpy = vi.spyOn(URL, "revokeObjectURL");
+
+      selectFiles([new File(["a"], "a.png", { type: "image/png" })]);
+      const firstUrl = document.querySelector("img").src;
+
+      selectFiles([new File(["b"], "b.png", { type: "image/png" })]);
+
+      expect(revokeSpy).toHaveBeenCalledWith(firstUrl);
+      revokeSpy.mockRestore();
+    });
+
+    it("revokes the object URL on disconnect", async () => {
+      await setup();
+      const revokeSpy = vi.spyOn(URL, "revokeObjectURL");
+
+      selectFiles([new File(["a"], "a.png", { type: "image/png" })]);
+      const url = document.querySelector("img").src;
+
+      document.querySelector("[data-controller]").remove();
+      await tick();
+
+      expect(revokeSpy).toHaveBeenCalledWith(url);
+      revokeSpy.mockRestore();
+    });
+
+    it("does not revoke any URL when no image files have been previewed", async () => {
+      await setup();
+      const revokeSpy = vi.spyOn(URL, "revokeObjectURL");
+
+      selectFiles([new File(["a"], "a.txt")]);
+
+      expect(revokeSpy).not.toHaveBeenCalled();
+      revokeSpy.mockRestore();
     });
   });
 });

@@ -61,7 +61,7 @@ application.register("file-preview", FilePreviewController);
 
 ### Generated markup
 
-Each `<li>` carries `data-file-preview-type="image"` or `"file"` so you can target it in CSS. Image items include an `<img>` thumbnail (decorative — `alt=""`, since the filename is shown separately); every item includes `<span data-file-preview-role="name">` and `<span data-file-preview-role="size">`.
+Each `<li>` carries `data-file-preview-type="image"` or `"file"` so you can target it in CSS. Image items include an `<img>` thumbnail (decorative — `alt=""`, since the filename is shown separately); every item includes `<span data-file-preview-role="name">` and `<span data-file-preview-role="size">`, separated by a literal " · " text node so the two don't run together in default (unstyled) rendering.
 
 ## Accessibility
 

@@ -53,6 +53,8 @@ export default class extends Controller {
     name.textContent = file.name;
     item.appendChild(name);
 
+    item.appendChild(document.createTextNode(" · "));
+
     const size = document.createElement("span");
     size.dataset.filePreviewRole = "size";
     size.textContent = this._formatSize(file.size);
