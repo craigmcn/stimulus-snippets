@@ -83,7 +83,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 - **10 controllers shipped:** `dismiss`, `clipboard`, `password-reveal`, `character-count`, `password-rules`, `slug`, `checkbox-required`, `tabs`, `accordion`, `form-confirm`
 - **123 tests** across 10 test files — Vitest + jsdom; full Stimulus `Application` integration pattern
-- `form-confirm` controller built (`<dialog>`-based replacement for Rails 7's removed `data-confirm`); PR #7 opened, self-reviewed, one real bug found and fixed before merge (see Key decisions)
+- `form-confirm` controller built (`<dialog>`-based replacement for Rails 7's removed `data-confirm`); PR #7 merged, self-reviewed, one real bug found and fixed before merge (see Key decisions)
 - Researched and recorded 8 candidate components for future work (see "Candidate components" below), checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com for overlap
 - Vitest tooling wired in: `vitest.config.js`, `test`/`test:run` scripts, pre-commit + CI updated
 - `@vitest/eslint-plugin` added so `describe`/`it`/`expect`/`vi` globals are recognized in test files
@@ -98,6 +98,9 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **PR #5 merged** (`feat/accordion-controller`) — `accordion` controller: ARIA disclosure pattern, arrow-key nav, exclusive-open mode; `_closePanel(index)` helper extracted per Copilot review; 115 tests total
 - **PR #6 merged** (`feat/seo-discoverability`) — SEO and AI discoverability improvements to `docs/`
 - DNS/email spoofing records (`SPF`, `DMARC`, `www` redirect) resolved in Cloudflare
+- Docs site accent color changed from blue (`#2563eb`) to mustard/ochre (`#b45309` light / `#d29922` dark) — trialed against deep maroon/burgundy side-by-side in the running dev server before deciding; not yet committed
+- Mustard accent extended beyond links/active nav to: wordmark (`.logo-primary`), active sidebar nav (inset accent stripe via `box-shadow`), component-card hover border, and `prose h2` underline (now 2px, accent-colored)
+- `docs/public/favicon.svg` background updated from blue to mustard (`#b45309`) to match
 
 ### Key decisions
 
@@ -116,10 +119,12 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 - **`form-confirm` uses a single `_allowed` re-entry guard, not a separate "real" event** — `intercept()` preventDefault's and opens the dialog; `proceed()` sets the guard then calls `requestSubmit()`/`click()` on the original source element, so the same listener sees the replay and lets it through. Works for both form `submit` and link/button `click` without Turbo-specific code. Documented limitation: Turbo's `data-turbo-method` links bypass native form submission entirely, so they need `Turbo.setConfirmMethod()` instead — out of scope for a vanilla Stimulus controller.
 - **`form-confirm` guards against double `showModal()` calls** — calling `showModal()` on an already-open `<dialog>` throws `InvalidStateError` in real browsers; this path is invisible to the test suite since jsdom doesn't implement `showModal` at all (confirmed by direct probe, not just absence in test output). `_open()` now checks `this.dialogTarget.open` first. Found via self-review of PR #7 before merge, not via test failure — worth remembering that this controller's dialog-open path is structurally undertested in jsdom and needs reasoning about real-browser behavior directly.
+- **Docs accent: mustard over maroon** — both were prototyped live in the dev server (swapping CSS variable values) before picking; mustard read as more distinctive than blue without the "alarm/error" connotation maroon risked. Decided via direct visual comparison, not by description alone.
 
 ### Open PRs (pending merge)
 
-- **PR #7** (`feat/form-confirm-controller`) — `form-confirm` controller; pushed and self-reviewed, showModal double-open guard fixed in a follow-up commit
+- None — PR #7 (`feat/form-confirm-controller`) merged 2026-06-17
+- **Uncommitted:** docs mustard accent + favicon change (`docs/src/styles/global.css`, `docs/public/favicon.svg`) — not yet on a branch or committed
 
 ### Next components (planned)
 
