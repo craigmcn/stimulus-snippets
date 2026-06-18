@@ -21,6 +21,8 @@ export default [
         KeyboardEvent: "readonly",
         DOMException: "readonly",
         console: "readonly",
+        URL: "readonly",
+        File: "readonly",
       },
     },
     rules: {
