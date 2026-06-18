@@ -71,6 +71,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 - **Standalone npm project** — not part of the root Yarn workspace; use `npm` inside `docs/`, not `yarn`
 - Content source: `components/*/README.md` via Astro content collection glob loader — no duplicated docs
+- A second `guides` content collection (`docs/src/content/guides/*.md`) holds standalone docs not tied to a specific controller (e.g. Rails + Stimulus setup); rendered at `/guides/[slug]` via the same markdown → Shiki pipeline as components, and listed in its own "Guides" sidebar section above "Components"
 - Dev server: `http://localhost:3130` (`npm run dev` inside `docs/`)
 - Features: sidebar nav, light/dark/system theme toggle (anti-FOUC), GitHub link, Shiki dual-theme code blocks, controller file links rewritten to GitHub blob URLs via remark plugin
 - Cloudflare Pages build settings: Root directory `docs`, Build command `npm ci && npm run build`, env var `SKIP_DEPENDENCY_INSTALL=true` (prevents Cloudflare auto-running `yarn install` due to root `yarn.lock`)
@@ -98,9 +99,13 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **PR #5 merged** (`feat/accordion-controller`) — `accordion` controller: ARIA disclosure pattern, arrow-key nav, exclusive-open mode; `_closePanel(index)` helper extracted per Copilot review; 115 tests total
 - **PR #6 merged** (`feat/seo-discoverability`) — SEO and AI discoverability improvements to `docs/`
 - DNS/email spoofing records (`SPF`, `DMARC`, `www` redirect) resolved in Cloudflare
-- Docs site accent color changed from blue (`#2563eb`) to mustard/ochre (`#b45309` light / `#d29922` dark) — trialed against deep maroon/burgundy side-by-side in the running dev server before deciding; not yet committed
+- Docs site accent color changed from blue (`#2563eb`) to mustard/ochre (`#b45309` light / `#d29922` dark) — trialed against deep maroon/burgundy side-by-side in the running dev server before deciding
 - Mustard accent extended beyond links/active nav to: wordmark (`.logo-primary`), active sidebar nav (inset accent stripe via `box-shadow`), component-card hover border, and `prose h2` underline (now 2px, accent-colored)
 - `docs/public/favicon.svg` background updated from blue to mustard (`#b45309`) to match
+- **PR #8 merged** (`feat/mustard-accent`) — the above mustard accent + favicon changes
+- New "Setting up Rails with Stimulus" guide added (`docs/src/content/guides/getting-started.md`) — covers new vs. existing Rails apps, importmap vs. `jsbundling-rails` install paths, verifying the install, copying/registering a controller, smoke-testing, and common gotchas; new `guides` content collection + `/guides/[slug]` route + sidebar nav section; linked from root README's "How to use"
+- Fixed `<pre>` code blocks blending into the page background in light mode — Shiki's light theme background (`#fff`) matched the page background exactly; forced a light-gray background (`var(--inline-code-bg)`) and added a subtle border in both themes for definition
+- **PR #9 opened** (`docs/rails-setup-guide`) — the above guide + light-mode contrast fix; reviewed (one wording fix applied, no other issues found)
 
 ### Key decisions
 
@@ -123,8 +128,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ### Open PRs (pending merge)
 
-- None — PR #7 (`feat/form-confirm-controller`) merged 2026-06-17
-- **Uncommitted:** docs mustard accent + favicon change (`docs/src/styles/global.css`, `docs/public/favicon.svg`) — not yet on a branch or committed
+- PR #9 (`docs/rails-setup-guide`) — Rails + Stimulus setup guide, `guides` content collection, light-mode code block contrast fix
 
 ### Next components (planned)
 

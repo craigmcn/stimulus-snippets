@@ -104,4 +104,4 @@ Drop the controller's HTML example (each component's page on this site has one) 
 
 - **Naming mismatch.** `dismiss_controller.js` registers as `application.register("dismiss", ...)` and is referenced as `data-controller="dismiss"`. Stimulus derives the identifier from the registered name, not the filename — if they drift, double-check `index.js`.
 - **Turbo and reconnects.** Turbo Drive swaps `<body>` content between page visits, which disconnects and reconnects controllers. Most controllers on this site handle that already (state is read from `data-*` attributes on `connect()`, not held only in memory) — but if you write your own, keep that pattern in mind.
-- **Importmap cache in production.** After pinning a new controller, run `bin/rails importmap:install` is not needed again, but you do need a fresh asset precompile (`bin/rails assets:precompile`) so the new pin ships.
+- **Importmap cache in production.** After pinning a new controller, you don't need to re-run `bin/rails importmap:install` — but you do need a fresh asset precompile (`bin/rails assets:precompile`) so the new pin ships.
