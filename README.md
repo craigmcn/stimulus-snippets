@@ -51,6 +51,7 @@ pin "controllers/dismiss_controller", to: "controllers/dismiss_controller.js"
 | [tabs](components/tabs/)                           | Tab panel switcher with ARIA tablist pattern and arrow-key navigation                |
 | [accordion](components/accordion/)                 | Expand/collapse content panels with ARIA disclosure and optional single-open mode    |
 | [form-confirm](components/form-confirm/)           | `<dialog>`-based confirmation prompt before a form submits or a link/button proceeds |
+| [search-filter](components/search-filter/)         | Client-side filter of a list as the user types, with optional "no results" message   |
 
 ---
 
