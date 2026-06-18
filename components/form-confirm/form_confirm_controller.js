@@ -7,6 +7,7 @@ export default class extends Controller {
   connect() {
     this._allowed = false;
     this._source = null;
+    this._submitter = null;
   }
 
   intercept(event) {
@@ -17,6 +18,7 @@ export default class extends Controller {
 
     event.preventDefault();
     this._source = event.target;
+    this._submitter = event.submitter ?? null;
 
     if (this.hasMessageTarget && this.messageValue) {
       this.messageTarget.textContent = this.messageValue;
@@ -29,12 +31,14 @@ export default class extends Controller {
     this._close();
 
     const source = this._source;
+    const submitter = this._submitter;
     this._source = null;
+    this._submitter = null;
     if (!source) return;
 
     this._allowed = true;
     if (typeof source.requestSubmit === "function") {
-      source.requestSubmit();
+      source.requestSubmit(submitter);
     } else {
       source.click();
     }
@@ -43,6 +47,7 @@ export default class extends Controller {
   cancel() {
     this._close();
     this._source = null;
+    this._submitter = null;
   }
 
   _open() {
