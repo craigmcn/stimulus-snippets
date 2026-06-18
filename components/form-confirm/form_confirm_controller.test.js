@@ -22,6 +22,27 @@ const FORM_HTML = `
   </div>
 `;
 
+const MULTI_SUBMIT_FORM_HTML = `
+  <div data-controller="form-confirm" data-form-confirm-message-value="Delete this post?">
+    <form id="form" action="#" data-action="submit->form-confirm#intercept">
+      <button type="submit" name="commit" value="Save" id="save-btn">Save</button>
+      <button type="submit" name="commit" value="Save and add another" id="save-and-add-btn">
+        Save and add another
+      </button>
+    </form>
+
+    <dialog data-form-confirm-target="dialog">
+      <p data-form-confirm-target="message"></p>
+      <button type="button" id="confirm-btn" data-action="click->form-confirm#proceed">
+        Confirm
+      </button>
+      <button type="button" id="cancel-btn" data-action="click->form-confirm#cancel">
+        Cancel
+      </button>
+    </dialog>
+  </div>
+`;
+
 const LINK_HTML = `
   <div data-controller="form-confirm">
     <a id="link" href="#" data-action="click->form-confirm#intercept">Remove</a>
@@ -101,6 +122,21 @@ describe("FormConfirmController", () => {
 
       expect(submitCount).toBe(2);
       expect(document.querySelector("dialog").open).toBe(false);
+    });
+
+    it("preserves which submit button was clicked across the resubmit", async () => {
+      await setup(MULTI_SUBMIT_FORM_HTML);
+      const form = document.getElementById("form");
+      const submitters = [];
+      form.addEventListener("submit", (e) => {
+        submitters.push(e.submitter?.id ?? null);
+        e.preventDefault();
+      });
+
+      document.getElementById("save-and-add-btn").click();
+      document.getElementById("confirm-btn").click();
+
+      expect(submitters).toEqual(["save-and-add-btn", "save-and-add-btn"]);
     });
 
     it("does not resubmit the form when cancel is clicked", async () => {

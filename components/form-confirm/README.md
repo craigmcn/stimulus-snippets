@@ -81,11 +81,11 @@ Any clickable element works the same way — wire `click` instead of `submit`:
 
 ### Actions
 
-| Action      | Description                                                                                        |
-| ----------- | -------------------------------------------------------------------------------------------------- |
-| `intercept` | Stops the original `submit` or `click`, records the source element, and opens the dialog.          |
-| `proceed`   | Closes the dialog and re-issues the original action (`form.requestSubmit()` or `element.click()`). |
-| `cancel`    | Closes the dialog and discards the pending action.                                                 |
+| Action      | Description                                                                                                 |
+| ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `intercept` | Stops the original `submit` or `click`, records the source element, and opens the dialog.                   |
+| `proceed`   | Closes the dialog and re-issues the original action (`form.requestSubmit(submitter)` or `element.click()`). |
+| `cancel`    | Closes the dialog and discards the pending action.                                                          |
 
 ## Accessibility
 
@@ -94,3 +94,4 @@ Any clickable element works the same way — wire `click` instead of `submit`:
 - Wire `data-action="cancel->form-confirm#cancel"` on the `dialog` target if you want pressing <kbd>Esc</kbd> to also clear the pending action (native `<dialog>` fires a `cancel` event on <kbd>Esc</kbd> when shown via `showModal()`).
 - This controller intercepts a single element's `submit`/`click` event. For Turbo's `data-turbo-method` links, which bypass the DOM's native form-submission flow, prefer [`Turbo.setConfirmMethod()`](https://turbo.hotwired.dev/reference/drive#custom-confirmation-method) to swap in a dialog-based confirm globally instead.
 - If multiple triggers share one `dialog` target, intercepting a second trigger while the dialog is already open keeps it open (and replaces the pending action) rather than re-opening it — calling `showModal()` on an already-open dialog throws in real browsers.
+- For forms with more than one submit button sharing a `name` but differing `value` (e.g. `<%= form.button "Save", name: :commit %>` / `<%= form.button "Save and add another", name: :commit %>`), the controller remembers which button was clicked (`event.submitter`) and replays the resubmit through that same button, so the correct `commit` value still reaches the server.

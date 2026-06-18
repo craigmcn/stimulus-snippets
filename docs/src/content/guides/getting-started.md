@@ -68,6 +68,20 @@ import "controllers";
 
 If `app/javascript/controllers/` doesn't exist at all, re-run `bin/rails stimulus:install` — it's safe to run again.
 
+One more thing to check, and the most common reason nothing happens at all: your layout actually has to render the script tag that loads this entrypoint. On an importmap setup that's:
+
+```erb
+<%= javascript_importmap_tags %>
+```
+
+or, on `jsbundling-rails`:
+
+```erb
+<%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+```
+
+`bin/rails stimulus:install` adds this automatically on a fresh install, but it's easy to lose on a hand-rolled or migrated layout — and when it's missing, there's no error, Stimulus just never boots.
+
 ## Copying a controller
 
 Once Stimulus is confirmed working, using any controller from this site is the same three steps regardless of which install path you took:
@@ -105,3 +119,4 @@ Drop the controller's HTML example (each component's page on this site has one) 
 - **Naming mismatch.** `dismiss_controller.js` registers as `application.register("dismiss", ...)` and is referenced as `data-controller="dismiss"`. Stimulus derives the identifier from the registered name, not the filename — if they drift, double-check `index.js`.
 - **Turbo and reconnects.** Turbo Drive swaps `<body>` content between page visits, which disconnects and reconnects controllers. Most controllers on this site handle that already (state is read from `data-*` attributes on `connect()`, not held only in memory) — but if you write your own, keep that pattern in mind.
 - **Importmap cache in production.** After pinning a new controller, you don't need to re-run `bin/rails importmap:install` — but you do need a fresh asset precompile (`bin/rails assets:precompile`) so the new pin ships.
+- **CSP and importmap nonces.** Rails ships with `config/initializers/content_security_policy.rb` commented out, but if your app enables it, the inline `<script type="importmap">` tag needs a nonce. `javascript_importmap_tags` adds this automatically — but only once `policy.nonce` is configured. Apps that enable CSP without checking this get `Refused to execute inline script` errors, often only in production since CSP is commonly left disabled in development.
