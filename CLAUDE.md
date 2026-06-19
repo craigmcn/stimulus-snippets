@@ -158,7 +158,7 @@ None — **PR #13** (`fix/mobile-docs-nav`) and **PR #16** (`docs/well-covered-e
 
 ### Next components (planned)
 
-None currently queued — pick from "Candidate components" below for the next one.
+1. `datetime-local` — converts a server-rendered UTC timestamp to the viewer's local time for display
 
 ### Open questions
 
@@ -170,7 +170,6 @@ Checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com (
 
 - `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
 - `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
-- `datetime-local` — converts a server-rendered UTC timestamp to the viewer's local time for display. Low-medium effort, high value.
 - `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
 - `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
 - `infinite-scroll` — loads the next page of a paginated/Turbo Stream list on scroll. Medium effort, medium value (Rails apps often prefer Turbo Frames/pagy links instead).
