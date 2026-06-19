@@ -54,6 +54,7 @@ pin "controllers/dismiss_controller", to: "controllers/dismiss_controller.js"
 | [search-filter](components/search-filter/)         | Client-side filter of a list as the user types, with optional "no results" message   |
 | [file-preview](components/file-preview/)           | Thumbnail or filename/size preview for selected files before a form submits          |
 | [dependent-select](components/dependent-select/)   | Filter one select's options based on another select's value (Country → State)        |
+| [datetime-local](components/datetime-local/)       | Display a server-rendered UTC timestamp in the viewer's local time zone              |
 
 ---
 

@@ -120,6 +120,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - New docs guide added: `docs/src/content/guides/well-covered-elsewhere.md` — surfaces the root README's "Well-covered elsewhere" table (third-party Stimulus component packages) plus the `field-sizing: content` CSS-only note and a new `stimulus-use` recommendation; previously this list existed only in the README, not on the docs site. Wired into the sidebar's "Guides" nav in `Layout.astro`; build verified (`npm run build`) and the new `/guides/well-covered-elsewhere` page renders with correct title/description
 - PR #16 self-review (via `/review`) flagged a drift risk: the table now existed in both `README.md` and the new guide with no link between them, so a future edit to one could silently fall out of sync with the other. Fixed by making the guide the single source of truth: `README.md`'s "Well-covered elsewhere" section is now a one-line summary + link to `https://stimulus-snippets.dev/guides/well-covered-elsewhere`, table and `field-sizing` note removed from README (see Key decisions)
 - **PR #16 merged** (`docs/well-covered-elsewhere`) — the above guide + README link-out fix; `main` fast-forwarded locally
+- `datetime-local` controller built — formats a server-rendered UTC timestamp (read from a `<time datetime>` attribute, falling back to text content) into the viewer's local time zone via `Intl.DateTimeFormat`; `dateStyle`/`timeStyle` values (each settable to `none`) control which parts render, plus optional `locale`/`timeZone` overrides; the `datetime` attribute itself is left untouched so the element stays machine-readable; unparseable source values leave the element as-is; 6 tests, README, Components table row
 
 ### Key decisions
 
@@ -158,19 +159,13 @@ None — **PR #13** (`fix/mobile-docs-nav`) and **PR #16** (`docs/well-covered-e
 
 ### Next components (planned)
 
-1. `datetime-local` — converts a server-rendered UTC timestamp to the viewer's local time for display
+Ordered by value for effort (checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com to avoid duplicating the README's "Well-covered elsewhere" list):
+
+1. `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
+2. `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
+3. `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
+4. `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
 
 ### Open questions
 
 - None currently. (Previous open question — the uncommitted `field-sizing: content` README note — is resolved: it's now mirrored into the new `well-covered-elsewhere` docs guide. The README edit, the new guide, and the `Layout.astro` nav change are still uncommitted on `main` as of this checkpoint and need a branch + PR per the global branch-protection rule before pushing.)
-
-### Candidate components (researched, not yet planned)
-
-Checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com (a paid component-library site whose pages only list category groupings, not concrete implementations) to avoid duplicating the README's "Well-covered elsewhere" list. None of these overlap shipped, planned, or well-covered-elsewhere controllers:
-
-- `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
-- `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
-- `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
-- `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
-- `infinite-scroll` — loads the next page of a paginated/Turbo Stream list on scroll. Medium effort, medium value (Rails apps often prefer Turbo Frames/pagy links instead).
-- `print-button` — triggers `window.print()`, optionally toggling print-only content first. Low effort, low-medium value (borderline whether it's worth a controller).
