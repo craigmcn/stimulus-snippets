@@ -59,6 +59,8 @@ correct state options already visible.
 | ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `data-dependent-select-group` | No       | Set on a `dependent` `<option>` to the `group` value it belongs to. Options without this attribute (e.g. a placeholder) are always shown. |
 
+**Edge case:** `data-dependent-select-group=""` (an explicit empty string, as opposed to omitting the attribute) matches when the `group` select has no value selected — it's treated as a real group code, not a placeholder. Omit the attribute entirely for an option you want shown regardless of the `group` value.
+
 ### Actions
 
 | Action   | Description                                                                                                                                              |
