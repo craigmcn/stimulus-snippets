@@ -76,6 +76,14 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - Features: sidebar nav, light/dark/system theme toggle (anti-FOUC), GitHub link, Shiki dual-theme code blocks, controller file links rewritten to GitHub blob URLs via remark plugin
 - Cloudflare Pages build settings: Root directory `docs`, Build command `npm ci && npm run build`, env var `SKIP_DEPENDENCY_INSTALL=true` (prevents Cloudflare auto-running `yarn install` due to root `yarn.lock`)
 
+## Demo app (`stimulus-snippets-demo`)
+
+A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/stimulus-snippets-demo) (`~/Web/stimulus-snippets-demo`), is a minimal Rails app that demonstrates every shipped controller on a real page in a real browser. It's local-only — not deployed anywhere — and exists purely to manually verify a controller's behavior before/after changes here.
+
+- Once a new component's PR has been reviewed (self-review or otherwise) and any review comments resolved, add a demo for it in `stimulus-snippets-demo` on its own branch + PR, following that repo's `CLAUDE.md` "Adding a demo for a new controller" checklist (copy the controller file, register it in `index.js` with a bare specifier, add it to `DemosController::DEMOS`, add a view adapted from the README's usage example).
+- Run it locally at `http://localhost:3140` (`bin/rails server -p 3140`, matching this repo's port table in `~/.claude/active_projects.md`).
+- Demo additions don't block merging the component PR in this repo — they're a follow-up step, not a prerequisite.
+
 ---
 
 ## Progress — 2026-06-19
@@ -119,6 +127,10 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - Built a new global skill, `~/.claude/skills/copilot-review-triage/SKILL.md` — fetches a PR's Copilot review comments via `gh api .../pulls/{n}/comments` + `/reviews`, requires verifying each against the actual file/diff (not taking Copilot's framing at face value), runs an independent review pass on top, consolidates both into one severity-tagged list, drafts a plan, and **always stops for explicit confirmation before implementing — even in auto mode** (the user's explicit requirement)
 - New docs guide added: `docs/src/content/guides/well-covered-elsewhere.md` — surfaces the root README's "Well-covered elsewhere" table (third-party Stimulus component packages) plus the `field-sizing: content` CSS-only note and a new `stimulus-use` recommendation; previously this list existed only in the README, not on the docs site. Wired into the sidebar's "Guides" nav in `Layout.astro`; build verified (`npm run build`) and the new `/guides/well-covered-elsewhere` page renders with correct title/description
 - PR #16 self-review (via `/review`) flagged a drift risk: the table now existed in both `README.md` and the new guide with no link between them, so a future edit to one could silently fall out of sync with the other. Fixed by making the guide the single source of truth: `README.md`'s "Well-covered elsewhere" section is now a one-line summary + link to `https://stimulus-snippets.dev/guides/well-covered-elsewhere`, table and `field-sizing` note removed from README (see Key decisions)
+- **PR #16 merged** (`docs/well-covered-elsewhere`) — the above guide + README link-out fix; `main` fast-forwarded locally
+- `datetime-local` controller built — formats a server-rendered UTC timestamp (read from a `<time datetime>` attribute, falling back to text content) into the viewer's local time zone via `Intl.DateTimeFormat`; `dateStyle`/`timeStyle` values (each settable to `none`) control which parts render, plus optional `locale`/`timeZone` overrides; the `datetime` attribute itself is left untouched so the element stays machine-readable; unparseable source values leave the element as-is; 6 tests, README, Components table row
+- **PR #17 opened** (`feat/datetime-local-controller`) — the above; triaged via `copilot-review-triage`: Copilot's review caught a real gap (`Intl.DateTimeFormat` construction had no try/catch, so an invalid `data-*` `timeZone`/`dateStyle`/`timeStyle` would crash the controller — inconsistent with `password-rules`' own RegExp try/catch precedent) and a flakiness risk (tests hardcoded `Intl.DateTimeFormat` output strings instead of deriving them, which can drift across Node/ICU versions since the repo had no pinned Node version at the time); both fixed, plus a regression test for the invalid-`timeZone` case and two added coverage-gap tests (both styles `none`; no source at all); 9 tests total for this controller
+- Node version pinned repo-wide in response to the above flakiness finding: added `.node-version` (`24`) and `engines: { node: ">=24" }` in both `package.json` and `docs/package.json`; `ci.yml` now reads `node-version-file: .node-version` in both jobs instead of hardcoding `node-version: 24` twice
 
 ### Key decisions
 
@@ -153,24 +165,17 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ### Open PRs (pending merge)
 
-None — **PR #13** (`fix/mobile-docs-nav`) merged. Currently uncommitted on `main` (not yet branched/PR'd): root `README.md` `field-sizing` note, new `docs/src/content/guides/well-covered-elsewhere.md`, and the `Layout.astro` sidebar nav entry for it.
+None — **PR #13** (`fix/mobile-docs-nav`) and **PR #16** (`docs/well-covered-elsewhere`) both merged.
 
 ### Next components (planned)
 
-None currently queued — pick from "Candidate components" below for the next one.
+Ordered by value for effort (checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com to avoid duplicating the README's "Well-covered elsewhere" list):
+
+1. `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
+2. `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
+3. `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
+4. `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
 
 ### Open questions
 
-- None currently. (Previous open question — the uncommitted `field-sizing: content` README note — is resolved: it's now mirrored into the new `well-covered-elsewhere` docs guide. The README edit, the new guide, and the `Layout.astro` nav change are still uncommitted on `main` as of this checkpoint and need a branch + PR per the global branch-protection rule before pushing.)
-
-### Candidate components (researched, not yet planned)
-
-Checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com (a paid component-library site whose pages only list category groupings, not concrete implementations) to avoid duplicating the README's "Well-covered elsewhere" list. None of these overlap shipped, planned, or well-covered-elsewhere controllers:
-
-- `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
-- `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
-- `datetime-local` — converts a server-rendered UTC timestamp to the viewer's local time for display. Low-medium effort, high value.
-- `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
-- `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
-- `infinite-scroll` — loads the next page of a paginated/Turbo Stream list on scroll. Medium effort, medium value (Rails apps often prefer Turbo Frames/pagy links instead).
-- `print-button` — triggers `window.print()`, optionally toggling print-only content first. Low effort, low-medium value (borderline whether it's worth a controller).
+- None currently. (Previous open question — the uncommitted `field-sizing: content` README note — is resolved: it's now mirrored into the new `well-covered-elsewhere` docs guide, merged via PR #16.)
