@@ -3,6 +3,11 @@ import { Application } from "@hotwired/stimulus";
 import DatetimeLocalController from "./datetime_local_controller";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+const date = new Date("2026-06-19T15:30:00Z");
+
+function expectedText(locale, options) {
+  return new Intl.DateTimeFormat(locale, options).format(date);
+}
 
 describe("DatetimeLocalController", () => {
   let application;
@@ -35,7 +40,13 @@ describe("DatetimeLocalController", () => {
     `);
 
     const time = document.querySelector("time");
-    expect(time.textContent).toBe("Jun 19, 2026, 3:30 PM");
+    expect(time.textContent).toBe(
+      expectedText("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "UTC",
+      }),
+    );
     expect(time.getAttribute("datetime")).toBe("2026-06-19T15:30:00Z");
   });
 
@@ -52,7 +63,7 @@ describe("DatetimeLocalController", () => {
     `);
 
     expect(document.querySelector("time").textContent).toBe(
-      "Friday, June 19, 2026",
+      expectedText("en-US", { dateStyle: "full", timeZone: "UTC" }),
     );
   });
 
@@ -68,7 +79,9 @@ describe("DatetimeLocalController", () => {
       ></time>
     `);
 
-    expect(document.querySelector("time").textContent).toBe("3:30:00 PM UTC");
+    expect(document.querySelector("time").textContent).toBe(
+      expectedText("en-US", { timeStyle: "long", timeZone: "UTC" }),
+    );
   });
 
   it("formats according to a different locale", async () => {
@@ -83,7 +96,11 @@ describe("DatetimeLocalController", () => {
     `);
 
     expect(document.querySelector("time").textContent).toBe(
-      "19/06/2026, 15:30",
+      expectedText("en-GB", {
+        dateStyle: "short",
+        timeStyle: "short",
+        timeZone: "UTC",
+      }),
     );
   });
 
@@ -97,7 +114,11 @@ describe("DatetimeLocalController", () => {
     `);
 
     expect(document.querySelector("time").textContent).toBe(
-      "Jun 19, 2026, 3:30 PM",
+      expectedText("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "UTC",
+      }),
     );
   });
 
@@ -110,6 +131,45 @@ describe("DatetimeLocalController", () => {
 
     expect(document.querySelector("time").textContent.trim()).toBe(
       "not-a-real-date",
+    );
+  });
+
+  it("leaves the text content untouched when both dateStyle and timeStyle are none", async () => {
+    await setup(`
+      <time
+        data-controller="datetime-local"
+        data-datetime-local-date-style-value="none"
+        data-datetime-local-time-style-value="none"
+        datetime="2026-06-19T15:30:00Z"
+      >
+        original text
+      </time>
+    `);
+
+    expect(document.querySelector("time").textContent.trim()).toBe(
+      "original text",
+    );
+  });
+
+  it("leaves the text content untouched when there is no datetime attribute or text content", async () => {
+    await setup(`<time data-controller="datetime-local"></time>`);
+
+    expect(document.querySelector("time").textContent).toBe("");
+  });
+
+  it("does not throw and leaves the text content untouched when timeZone is invalid", async () => {
+    await setup(`
+      <time
+        data-controller="datetime-local"
+        data-datetime-local-time-zone-value="Not/AZone"
+        datetime="2026-06-19T15:30:00Z"
+      >
+        original text
+      </time>
+    `);
+
+    expect(document.querySelector("time").textContent.trim()).toBe(
+      "original text",
     );
   });
 });

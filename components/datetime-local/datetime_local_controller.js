@@ -13,8 +13,9 @@ export default class extends Controller {
   }
 
   render() {
-    const isoString =
-      this.element.getAttribute("datetime") || this.element.textContent.trim();
+    const isoString = (
+      this.element.getAttribute("datetime") || this.element.textContent
+    ).trim();
     if (!isoString) return;
 
     const date = new Date(isoString);
@@ -26,11 +27,16 @@ export default class extends Controller {
       this.timeStyleValue === "none" ? undefined : this.timeStyleValue;
     if (!dateStyle && !timeStyle) return;
 
-    const formatter = new Intl.DateTimeFormat(this.localeValue || undefined, {
-      dateStyle,
-      timeStyle,
-      timeZone: this.timeZoneValue || undefined,
-    });
+    let formatter;
+    try {
+      formatter = new Intl.DateTimeFormat(this.localeValue || undefined, {
+        dateStyle,
+        timeStyle,
+        timeZone: this.timeZoneValue || undefined,
+      });
+    } catch {
+      return;
+    }
 
     this.element.textContent = formatter.format(date);
   }

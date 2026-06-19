@@ -121,6 +121,8 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - PR #16 self-review (via `/review`) flagged a drift risk: the table now existed in both `README.md` and the new guide with no link between them, so a future edit to one could silently fall out of sync with the other. Fixed by making the guide the single source of truth: `README.md`'s "Well-covered elsewhere" section is now a one-line summary + link to `https://stimulus-snippets.dev/guides/well-covered-elsewhere`, table and `field-sizing` note removed from README (see Key decisions)
 - **PR #16 merged** (`docs/well-covered-elsewhere`) — the above guide + README link-out fix; `main` fast-forwarded locally
 - `datetime-local` controller built — formats a server-rendered UTC timestamp (read from a `<time datetime>` attribute, falling back to text content) into the viewer's local time zone via `Intl.DateTimeFormat`; `dateStyle`/`timeStyle` values (each settable to `none`) control which parts render, plus optional `locale`/`timeZone` overrides; the `datetime` attribute itself is left untouched so the element stays machine-readable; unparseable source values leave the element as-is; 6 tests, README, Components table row
+- **PR #17 opened** (`feat/datetime-local-controller`) — the above; triaged via `copilot-review-triage`: Copilot's review caught a real gap (`Intl.DateTimeFormat` construction had no try/catch, so an invalid `data-*` `timeZone`/`dateStyle`/`timeStyle` would crash the controller — inconsistent with `password-rules`' own RegExp try/catch precedent) and a flakiness risk (tests hardcoded `Intl.DateTimeFormat` output strings instead of deriving them, which can drift across Node/ICU versions since the repo had no pinned Node version at the time); both fixed, plus a regression test for the invalid-`timeZone` case and two added coverage-gap tests (both styles `none`; no source at all); 9 tests total for this controller
+- Node version pinned repo-wide in response to the above flakiness finding: added `.node-version` (`24`) and `engines: { node: ">=24" }` in both `package.json` and `docs/package.json`; `ci.yml` now reads `node-version-file: .node-version` in both jobs instead of hardcoding `node-version: 24` twice
 
 ### Key decisions
 
@@ -168,4 +170,4 @@ Ordered by value for effort (checked against stimulus-components.com, awesome-st
 
 ### Open questions
 
-- None currently. (Previous open question — the uncommitted `field-sizing: content` README note — is resolved: it's now mirrored into the new `well-covered-elsewhere` docs guide. The README edit, the new guide, and the `Layout.astro` nav change are still uncommitted on `main` as of this checkpoint and need a branch + PR per the global branch-protection rule before pushing.)
+- None currently. (Previous open question — the uncommitted `field-sizing: content` README note — is resolved: it's now mirrored into the new `well-covered-elsewhere` docs guide, merged via PR #16.)
