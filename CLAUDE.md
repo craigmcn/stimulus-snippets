@@ -76,6 +76,14 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - Features: sidebar nav, light/dark/system theme toggle (anti-FOUC), GitHub link, Shiki dual-theme code blocks, controller file links rewritten to GitHub blob URLs via remark plugin
 - Cloudflare Pages build settings: Root directory `docs`, Build command `npm ci && npm run build`, env var `SKIP_DEPENDENCY_INSTALL=true` (prevents Cloudflare auto-running `yarn install` due to root `yarn.lock`)
 
+## Demo app (`stimulus-snippets-demo`)
+
+A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/stimulus-snippets-demo) (`~/Web/stimulus-snippets-demo`), is a minimal Rails app that demonstrates every shipped controller on a real page in a real browser. It's local-only — not deployed anywhere — and exists purely to manually verify a controller's behavior before/after changes here.
+
+- Once a new component's PR has been reviewed (self-review or otherwise) and any review comments resolved, add a demo for it in `stimulus-snippets-demo` on its own branch + PR, following that repo's `CLAUDE.md` "Adding a demo for a new controller" checklist (copy the controller file, register it in `index.js` with a bare specifier, add it to `DemosController::DEMOS`, add a view adapted from the README's usage example).
+- Run it locally at `http://localhost:3140` (`bin/rails server -p 3140`, matching this repo's port table in `~/.claude/active_projects.md`).
+- Demo additions don't block merging the component PR in this repo — they're a follow-up step, not a prerequisite.
+
 ---
 
 ## Progress — 2026-06-19
