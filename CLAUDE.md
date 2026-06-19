@@ -78,7 +78,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ---
 
-## Progress — 2026-06-18
+## Progress — 2026-06-19
 
 ### Completed
 
@@ -113,7 +113,11 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - Docs site mobile/tablet responsive review: sidebar nav now collapses behind a hamburger toggle (`.sidebar-toggle`, `aria-expanded`) below 768px instead of stacking fully above content; added `nav + nav` margin so Guides/Components/All sections have visible separation; GitHub link + theme toggle shrunk and laid out as a compact row on mobile instead of full-width blocks; `.prose th { white-space: normal }` on mobile to stop API table headers from forcing horizontal page scroll
 - **PR #13 opened** (`fix/mobile-docs-nav`) — the above mobile nav/table fixes
 - `file-preview` controller built — previews selected files before form submit: image thumbnails via object URLs (revoked on re-render/disconnect), filename/size for everything else; `clear` action resets the whole selection; no per-file remove (`DataTransfer` FileList rebuilding is real-browser-only, no jsdom equivalent); 13 tests, README, Components table row
-- **PR #14 opened** (`feat/file-preview-controller`) — the above; Copilot review caught two real issues fixed before merge: filename/size spans ran together with no separator in unstyled markup, and object-URL revocation wasn't covered by tests (see Key decisions)
+- **PR #14 merged** (`feat/file-preview-controller`) — the above; Copilot review caught two real issues fixed before merge: filename/size spans ran together with no separator in unstyled markup, and object-URL revocation wasn't covered by tests (see Key decisions); 148 tests total
+- `dependent-select` controller built — filters one `<select>`'s options based on another select's value (e.g. Country → State) via `data-dependent-select-group` on options; non-matching options are hidden+disabled, stale dependent selections are cleared on group change; 8 tests, README, Components table row
+- **PR #15 merged** (`feat/dependent-select-controller`) — the above; reviewed via the new `copilot-review-triage` skill (see Key decisions): Copilot's one comment was valid (PR description claimed 12 tests, actual was 8 — fixed the description, no code change needed); also documented an undocumented edge case (`data-dependent-select-group=""` matches an empty group selection, unlike omitting the attribute) found during my own independent pass; 156 tests total
+- Built a new global skill, `~/.claude/skills/copilot-review-triage/SKILL.md` — fetches a PR's Copilot review comments via `gh api .../pulls/{n}/comments` + `/reviews`, requires verifying each against the actual file/diff (not taking Copilot's framing at face value), runs an independent review pass on top, consolidates both into one severity-tagged list, drafts a plan, and **always stops for explicit confirmation before implementing — even in auto mode** (the user's explicit requirement)
+- New docs guide added: `docs/src/content/guides/well-covered-elsewhere.md` — surfaces the root README's "Well-covered elsewhere" table (third-party Stimulus component packages) plus the `field-sizing: content` CSS-only note and a new `stimulus-use` recommendation; previously this list existed only in the README, not on the docs site. Wired into the sidebar's "Guides" nav in `Layout.astro`; build verified (`npm run build`) and the new `/guides/well-covered-elsewhere` page renders with correct title/description
 
 ### Key decisions
 
@@ -138,16 +142,24 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - **`file-preview` separates name/size with a literal text node, not CSS** — Copilot review on PR #14 caught that the generated `name`/`size` `<span>`s were appended with no whitespace between them, so default (unstyled) rendering ran them together (`"a.txt2.0 KB"`) — a real bug, since the README explicitly says no CSS is assumed. Fixed with a `" · "` text node between the spans rather than relying on a consumer's CSS.
 - **`file-preview` object-URL revocation needed its own test** — the controller's most important resource-management behavior (revoking previous object URLs on re-render and on disconnect) had no assertion in the original test suite; same review caught this. Added `vi.spyOn(URL, "revokeObjectURL")` tests covering re-render, disconnect, and the no-image-files case — `URL.createObjectURL`/`revokeObjectURL` are real, spyable functions in jsdom (unlike `DataTransfer`, which jsdom doesn't implement at all), so this didn't hit the same real-vs-jsdom wall as the `form-confirm`/mobile-nav cases above.
 - **Solved the headless-Chromium sandbox blocker — `channel: 'chrome'` instead of Playwright's bundled download.** Playwright's own Chromium download carries the macOS quarantine flag and fails to launch from a sandboxed shell (`spawn ... -88`); stripping quarantine is a denied security-weakening action. Launching against the already-Gatekeeper-cleared system Chrome (`chromium.launch({ channel: 'chrome' })`) sidesteps it entirely, no permission changes needed. Built a reusable global helper at `~/.claude/scripts/playwright-chrome/screenshot.js` (generic: takes URL/width/height/outfile/`--click`/`--full-page`, prints `horizontalScroll` + console errors as JSON) so this works across all projects, not just this one. Documented as a project skill at `docs/.claude/skills/screenshot-mobile/SKILL.md` so future sessions in this repo find it automatically via the `run` skill's project-skill lookup.
+- **`dependent-select` uses `hidden` + `disabled` together on non-matching options, not CSS** — matches the project's "no CSS assumed" stance; `disabled` alone isn't enough because some browsers still show a disabled option in the closed `<select>` if it happens to be the current value, and `hidden` alone doesn't block keyboard typeahead from landing on it.
+- **`dependent-select` resets the dependent value (not the group value) when a selection no longer matches** — resetting the group instead would be surprising (the user didn't touch that field) and would cascade confusingly if more than one dependent select existed.
+- **Built `copilot-review-triage` as a global skill (`~/.claude/skills/`), not a project skill** — it has no dependency on this repo's tooling (just `gh` CLI), so it belongs at the user level where every repo can use it, unlike `screenshot-mobile` which is genuinely specific to this repo's docs site.
 - **First mobile-nav fix attempt was verified only by static analysis and shipped a wrong root-cause guess** — without a real screenshot, guessed the horizontal-scroll cause was API-table `<th>` `white-space: nowrap` and added `white-space: normal` on mobile. Once the screenshot tooling above was built and used for real, this turned out to be wrong: actual cause was an unbreakable inline `<code>` token (e.g. `successDuration`) in a table _body_ cell forcing the table past viewport width — headers were never the problem. Real fix: `.prose table { display: block; overflow-x: auto; }` (mirrors the existing `.prose pre` overflow pattern), and the `th` mobile override was removed as ineffective. **Lesson: static CSS analysis caught the symptom category but guessed the wrong element; a real rendered screenshot found the actual offending node in one pass** — worth always reaching for the real browser check before describing a CSS-overflow fix as done.
+- **"Well-covered elsewhere" guide is a new standalone guide page, not folded into an existing one** — it's conceptually distinct from "Setting up Rails with Stimulus" (an onboarding walkthrough vs. a reference list of third-party alternatives), so it gets its own slug and sidebar entry rather than a section bolted onto the getting-started guide.
+- **Sidebar "Guides" nav remains hand-written per-entry in `Layout.astro`, not generated from the `guides` collection** — consistent with the existing pattern (the `getting-started` link was already hardcoded); a loop over `getCollection('guides')` would be a reasonable future cleanup if a third guide gets added, but two manual entries doesn't yet justify the refactor.
 
 ### Open PRs (pending merge)
 
-- **PR #13** (`fix/mobile-docs-nav`) — docs site mobile nav collapse, section spacing, de-emphasized GitHub/theme controls, table-header wrap fix; open, pending review
-- **PR #14** (`feat/file-preview-controller`) — `file-preview` controller; open, pending review
+None — **PR #13** (`fix/mobile-docs-nav`) merged. Currently uncommitted on `main` (not yet branched/PR'd): root `README.md` `field-sizing` note, new `docs/src/content/guides/well-covered-elsewhere.md`, and the `Layout.astro` sidebar nav entry for it.
 
 ### Next components (planned)
 
-1. `dependent-select` — client-side Country→State filtering
+None currently queued — pick from "Candidate components" below for the next one.
+
+### Open questions
+
+- None currently. (Previous open question — the uncommitted `field-sizing: content` README note — is resolved: it's now mirrored into the new `well-covered-elsewhere` docs guide. The README edit, the new guide, and the `Layout.astro` nav change are still uncommitted on `main` as of this checkpoint and need a branch + PR per the global branch-protection rule before pushing.)
 
 ### Candidate components (researched, not yet planned)
 

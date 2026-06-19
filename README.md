@@ -71,6 +71,8 @@ The following patterns are intentionally not included here because mature, popul
 | Rails nested form   | [stimulus-rails-nested-form](https://www.stimulus-components.com/docs/stimulus-rails-nested-form/)     |
 | Autosave            | [stimulus-rails-autosave](https://www.stimulus-components.com/docs/stimulus-rails-autosave/)           |
 
+For textarea autogrow specifically, also consider the CSS-only [`field-sizing: content`](https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing) property — no JS needed in [browsers that support it](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/field-sizing#browser_compatibility) (Chrome/Edge 123+, Safari 26.2; in preview in Firefox; as of 2026).
+
 ---
 
 ## Requirements
