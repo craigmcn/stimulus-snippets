@@ -119,6 +119,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 - Built a new global skill, `~/.claude/skills/copilot-review-triage/SKILL.md` — fetches a PR's Copilot review comments via `gh api .../pulls/{n}/comments` + `/reviews`, requires verifying each against the actual file/diff (not taking Copilot's framing at face value), runs an independent review pass on top, consolidates both into one severity-tagged list, drafts a plan, and **always stops for explicit confirmation before implementing — even in auto mode** (the user's explicit requirement)
 - New docs guide added: `docs/src/content/guides/well-covered-elsewhere.md` — surfaces the root README's "Well-covered elsewhere" table (third-party Stimulus component packages) plus the `field-sizing: content` CSS-only note and a new `stimulus-use` recommendation; previously this list existed only in the README, not on the docs site. Wired into the sidebar's "Guides" nav in `Layout.astro`; build verified (`npm run build`) and the new `/guides/well-covered-elsewhere` page renders with correct title/description
 - PR #16 self-review (via `/review`) flagged a drift risk: the table now existed in both `README.md` and the new guide with no link between them, so a future edit to one could silently fall out of sync with the other. Fixed by making the guide the single source of truth: `README.md`'s "Well-covered elsewhere" section is now a one-line summary + link to `https://stimulus-snippets.dev/guides/well-covered-elsewhere`, table and `field-sizing` note removed from README (see Key decisions)
+- **PR #16 merged** (`docs/well-covered-elsewhere`) — the above guide + README link-out fix; `main` fast-forwarded locally
 
 ### Key decisions
 
@@ -153,7 +154,7 @@ Static Astro 5 site deployed to [stimulus-snippets.dev](https://stimulus-snippet
 
 ### Open PRs (pending merge)
 
-None — **PR #13** (`fix/mobile-docs-nav`) merged. Currently uncommitted on `main` (not yet branched/PR'd): root `README.md` `field-sizing` note, new `docs/src/content/guides/well-covered-elsewhere.md`, and the `Layout.astro` sidebar nav entry for it.
+None — **PR #13** (`fix/mobile-docs-nav`) and **PR #16** (`docs/well-covered-elsewhere`) both merged.
 
 ### Next components (planned)
 
