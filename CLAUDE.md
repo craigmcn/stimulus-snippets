@@ -129,8 +129,12 @@ A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/
 - PR #16 self-review (via `/review`) flagged a drift risk: the table now existed in both `README.md` and the new guide with no link between them, so a future edit to one could silently fall out of sync with the other. Fixed by making the guide the single source of truth: `README.md`'s "Well-covered elsewhere" section is now a one-line summary + link to `https://stimulus-snippets.dev/guides/well-covered-elsewhere`, table and `field-sizing` note removed from README (see Key decisions)
 - **PR #16 merged** (`docs/well-covered-elsewhere`) — the above guide + README link-out fix; `main` fast-forwarded locally
 - `datetime-local` controller built — formats a server-rendered UTC timestamp (read from a `<time datetime>` attribute, falling back to text content) into the viewer's local time zone via `Intl.DateTimeFormat`; `dateStyle`/`timeStyle` values (each settable to `none`) control which parts render, plus optional `locale`/`timeZone` overrides; the `datetime` attribute itself is left untouched so the element stays machine-readable; unparseable source values leave the element as-is; 6 tests, README, Components table row
-- **PR #17 opened** (`feat/datetime-local-controller`) — the above; triaged via `copilot-review-triage`: Copilot's review caught a real gap (`Intl.DateTimeFormat` construction had no try/catch, so an invalid `data-*` `timeZone`/`dateStyle`/`timeStyle` would crash the controller — inconsistent with `password-rules`' own RegExp try/catch precedent) and a flakiness risk (tests hardcoded `Intl.DateTimeFormat` output strings instead of deriving them, which can drift across Node/ICU versions since the repo had no pinned Node version at the time); both fixed, plus a regression test for the invalid-`timeZone` case and two added coverage-gap tests (both styles `none`; no source at all); 9 tests total for this controller
+- Triaged via `copilot-review-triage` on PR #17: Copilot's review caught a real gap (`Intl.DateTimeFormat` construction had no try/catch, so an invalid `data-*` `timeZone`/`dateStyle`/`timeStyle` would crash the controller — inconsistent with `password-rules`' own RegExp try/catch precedent) and a flakiness risk (tests hardcoded `Intl.DateTimeFormat` output strings instead of deriving them, which can drift across Node/ICU versions since the repo had no pinned Node version at the time); both fixed, plus a regression test for the invalid-`timeZone` case and two added coverage-gap tests (both styles `none`; no source at all); 9 tests total for this controller
 - Node version pinned repo-wide in response to the above flakiness finding: added `.node-version` (`24`) and `engines: { node: ">=24" }` in both `package.json` and `docs/package.json`; `ci.yml` now reads `node-version-file: .node-version` in both jobs instead of hardcoding `node-version: 24` twice
+- Documented the `stimulus-snippets-demo` sibling repo in this `CLAUDE.md` (local-only Rails app for viewing components in action; demo additions are a post-review follow-up, not a merge prerequisite)
+- **PR #17 merged** (`feat/datetime-local-controller`) — all of the above (controller, Copilot-triage fixes, Node pinning, demo-app docs note); `main` fast-forwarded locally; 165 tests total
+- `datetime-local` demo added to the sibling `stimulus-snippets-demo` repo (controller copy, `index.js` registration, `DemosController::DEMOS` entry, view with default/date-only/time-only-long variants); verified live via a real-browser screenshot — correctly converts the server's UTC timestamp to the browser's local time, no console errors, no horizontal scroll
+- **PR #5 merged** in `stimulus-snippets-demo` (`feat/datetime-local-demo`) — the above demo; `main` fast-forwarded locally in that repo
 
 ### Key decisions
 
@@ -165,7 +169,7 @@ A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/
 
 ### Open PRs (pending merge)
 
-None — **PR #13** (`fix/mobile-docs-nav`) and **PR #16** (`docs/well-covered-elsewhere`) both merged.
+None — **PR #13**, **PR #16**, and **PR #17** in this repo all merged; **PR #5** (`feat/datetime-local-demo`) in `stimulus-snippets-demo` also merged.
 
 ### Next components (planned)
 
