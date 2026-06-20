@@ -113,6 +113,57 @@ describe("NumberFormatController", () => {
     expect(input.value).toBe("1234.50");
   });
 
+  it("keeps the hidden target in sync after focus strips formatting", async () => {
+    document.body.innerHTML = `
+      <div
+        data-controller="number-format"
+        data-number-format-locale-value="en-US"
+        data-number-format-style-value="currency"
+        data-number-format-currency-value="USD"
+      >
+        <input
+          data-number-format-target="input"
+          data-action="focus->number-format#focus"
+          value="1234.5"
+        />
+        <input type="hidden" data-number-format-target="hidden" />
+      </div>
+    `;
+    await tick();
+
+    const input = document.querySelector("[data-number-format-target='input']");
+    const hidden = document.querySelector(
+      "[data-number-format-target='hidden']",
+    );
+
+    expect(input.value).toBe("$1,234.50");
+    expect(hidden.value).toBe("1234.5");
+
+    input.dispatchEvent(new Event("focus"));
+    await tick();
+
+    expect(input.value).toBe("1234.50");
+    expect(hidden.value).toBe("1234.50");
+  });
+
+  it("keeps the caret after a lone leading minus sign while typing", async () => {
+    const input = await setup(`
+      <input
+        data-controller="number-format"
+        data-number-format-target="input"
+        data-action="input->number-format#format"
+      />
+    `);
+
+    input.value = "-";
+    input.setSelectionRange(1, 1);
+    input.dispatchEvent(new Event("input"));
+    await tick();
+
+    expect(input.value).toBe("-");
+    expect(input.selectionStart).toBe(1);
+  });
+
   it("formats as currency on blur", async () => {
     const input = await setup(`
       <input
@@ -205,7 +256,7 @@ describe("NumberFormatController", () => {
     expect(input.value).toBe("1234");
   });
 
-  it("does not throw and leaves the value as-is when style is currency with no currency code", async () => {
+  it("does not throw and leaves the value as-is when the currency code is invalid", async () => {
     const input = await setup(`
       <input
         data-controller="number-format"

@@ -85,6 +85,6 @@ When a `hidden` target is present, give the `name` attribute to the hidden input
 ## Accessibility
 
 - The `locale` value affects only the _formatted_ display (currency symbol placement, locale-specific grouping). Typed and submitted values always use a plain period as the decimal separator — round-tripping a locale's own separators (e.g. `1.234,56` in `de-DE`) back into a raw number is ambiguous, so this controller deliberately doesn't attempt it. If you need full locale-aware parsing, do it server-side.
-- Add `inputmode="decimal"` on the visible input so mobile browsers show a numeric keyboard.
+- Add `inputmode="decimal"` on the visible input so mobile browsers show a numeric keyboard. Don't set `type="number"` — browsers disallow `setSelectionRange` on numeric inputs, which the live `format` action relies on for cursor preservation.
 - The live `format` action preserves cursor position by digit count, not character offset, so inserting or removing a grouping separator doesn't push the cursor to an unexpected spot.
 - If you don't need a separate submitted value (e.g. a quantity field where commas are harmless to the backend), omit the `hidden` target and the `name` attribute can stay on the visible `input`.

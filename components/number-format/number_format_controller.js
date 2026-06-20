@@ -13,25 +13,34 @@ export default class extends Controller {
   connect() {
     const raw = this._sanitize(this.inputTarget.value);
     this._syncHidden(raw);
-    this._display(raw);
+    if (this.inputTarget !== document.activeElement) this._display(raw);
   }
 
   format() {
     const input = this.inputTarget;
-    const digitsBeforeCursor = this._countDigits(
-      input.value.slice(0, input.selectionStart ?? input.value.length),
+    const beforeCursor = input.value.slice(
+      0,
+      input.selectionStart ?? input.value.length,
     );
+    const digitsBeforeCursor = this._countDigits(beforeCursor);
+    const minusBeforeCursor = /^[-−]/.test(beforeCursor);
 
     const raw = this._sanitize(input.value);
     input.value = this._group(raw);
     this._syncHidden(raw);
 
-    const cursor = this._cursorAfterDigits(input.value, digitsBeforeCursor);
+    const cursor = this._cursorAfterDigits(
+      input.value,
+      digitsBeforeCursor,
+      minusBeforeCursor,
+    );
     input.setSelectionRange(cursor, cursor);
   }
 
   focus() {
-    this.inputTarget.value = this._sanitize(this.inputTarget.value);
+    const raw = this._sanitize(this.inputTarget.value);
+    this.inputTarget.value = raw;
+    this._syncHidden(raw);
   }
 
   blur() {
@@ -110,8 +119,10 @@ export default class extends Controller {
     return (value.match(/[0-9]/g) || []).length;
   }
 
-  _cursorAfterDigits(value, digitCount) {
-    if (digitCount === 0) return 0;
+  _cursorAfterDigits(value, digitCount, minusBeforeCursor) {
+    if (digitCount === 0) {
+      return minusBeforeCursor && value.startsWith("-") ? 1 : 0;
+    }
     let seen = 0;
     for (let i = 0; i < value.length; i++) {
       if (/[0-9]/.test(value[i])) {
