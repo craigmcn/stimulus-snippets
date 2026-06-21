@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import SlugController, { toSlug } from "./slug_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -142,5 +143,26 @@ describe("SlugController", () => {
     source.dispatchEvent(new Event("input"));
 
     expect(output.value).toBe("");
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(`
+        <div id="widget" data-controller="slug">
+          <div>
+            <label for="post_title">Title</label>
+            <input id="post_title" type="text" name="post[title]" data-slug-target="source" data-action="input->slug#generate">
+          </div>
+          <div>
+            <label for="post_slug">Slug</label>
+            <input id="post_slug" type="text" name="post[slug]" data-slug-target="output" data-action="input->slug#lock">
+          </div>
+        </div>
+      `);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
   });
 });

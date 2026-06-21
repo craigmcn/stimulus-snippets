@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import FormConfirmController from "./form_confirm_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -191,6 +192,21 @@ describe("FormConfirmController", () => {
 
       expect(clickCount).toBe(1);
       expect(document.querySelector("dialog").open).toBe(false);
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations before the dialog opens", async () => {
+      await setup(FORM_HTML);
+      const violations = await getA11yViolations(document.body);
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations once the dialog is open", async () => {
+      await setup(FORM_HTML);
+      document.getElementById("form").querySelector("button").click();
+      const violations = await getA11yViolations(document.body);
+      expect(violations).toEqual([]);
     });
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import SearchFilterController from "./search_filter_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -163,6 +164,43 @@ describe("SearchFilterController", () => {
       filterFor("apple");
 
       expect(document.getElementById("empty").hidden).toBe(true);
+    });
+  });
+
+  describe("accessibility", () => {
+    const A11Y_HTML = `
+      <div id="widget" data-controller="search-filter">
+        <label for="input">Filter fruits</label>
+        <input
+          id="input"
+          type="search"
+          data-search-filter-target="input"
+          data-action="input->search-filter#filter"
+        />
+        <ul>
+          <li data-search-filter-target="item">Apple</li>
+          <li data-search-filter-target="item">Banana</li>
+          <li data-search-filter-target="item">Cherry</li>
+        </ul>
+        <p data-search-filter-target="empty" hidden>No fruits match your search.</p>
+      </div>
+    `;
+
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(A11Y_HTML);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations once the empty target is shown", async () => {
+      await setup(A11Y_HTML);
+      filterFor("xyz");
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
     });
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import NumberFormatController from "./number_format_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -269,5 +270,31 @@ describe("NumberFormatController", () => {
     `);
 
     expect(input.value).toBe("1234");
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      document.body.innerHTML = `
+        <div id="widget" data-controller="number-format" data-number-format-locale-value="en-US">
+          <label for="price">Price</label>
+          <input
+            id="price"
+            type="text"
+            inputmode="decimal"
+            data-number-format-style-value="currency"
+            data-number-format-currency-value="USD"
+            data-number-format-target="input"
+            data-action="input->number-format#format blur->number-format#blur focus->number-format#focus"
+            value="1234.5"
+          />
+          <input type="hidden" name="product[price]" data-number-format-target="hidden" />
+        </div>
+      `;
+      await tick();
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
   });
 });

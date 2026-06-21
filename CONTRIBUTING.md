@@ -4,7 +4,8 @@
 
 1. Create a new folder under `components/[name]/`.
 2. Add `[name]_controller.js` — the Stimulus controller.
-3. Add `README.md` following the format below.
+3. Add `[name]_controller.test.js`, including an "accessibility" describe block that runs `getA11yViolations` (from `test/axe.js`) against the documented usage example from the README — see existing controllers' test files for the pattern.
+4. Add `README.md` following the format below.
 
 ## Controller guidelines
 

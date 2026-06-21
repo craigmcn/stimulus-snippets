@@ -21,6 +21,7 @@ application.register("clipboard", ClipboardController);
     type="text"
     value="Hello world"
     data-clipboard-target="source"
+    aria-label="Text to copy"
     readonly
   />
   <button type="button" data-action="click->clipboard#copy">Copy</button>
@@ -41,7 +42,13 @@ application.register("clipboard", ClipboardController);
 ```html
 <!-- Custom feedback duration (500ms) -->
 <div data-controller="clipboard" data-clipboard-success-duration-value="500">
-  <input type="text" value="API key" data-clipboard-target="source" readonly />
+  <input
+    type="text"
+    value="API key"
+    data-clipboard-target="source"
+    aria-label="API key"
+    readonly
+  />
   <button type="button" data-action="click->clipboard#copy">Copy</button>
   <span data-clipboard-target="feedback" hidden aria-live="polite"
     >Copied!</span
@@ -73,4 +80,5 @@ application.register("clipboard", ClipboardController);
 ## Accessibility
 
 - Add `aria-live="polite"` to the feedback element (already shown in the example) so screen readers announce the confirmation.
+- A readonly `source` input has no visible `<label>` in the example above; give it an `aria-label` (or a visually hidden `<label>`) so screen reader users know what the field contains.
 - Uses the `navigator.clipboard` API, which requires a secure context (HTTPS or localhost) and may prompt for permission in some browsers.

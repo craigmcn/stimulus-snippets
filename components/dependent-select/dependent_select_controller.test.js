@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import DependentSelectController from "./dependent_select_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -147,6 +148,61 @@ describe("DependentSelectController", () => {
           expect(option.hidden).toBe(true);
           expect(option.disabled).toBe(true);
         });
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(`
+        <div id="widget" data-controller="dependent-select">
+          <label for="country">Country</label>
+          <select id="country" data-dependent-select-target="group" data-action="change->dependent-select#filter">
+            <option value="">Choose a country</option>
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+          </select>
+
+          <label for="state">State / Province</label>
+          <select id="state" data-dependent-select-target="dependent">
+            <option value="">Choose a state</option>
+            <option value="CA-state" data-dependent-select-group="US">California</option>
+            <option value="NY" data-dependent-select-group="US">New York</option>
+            <option value="ON" data-dependent-select-group="CA">Ontario</option>
+            <option value="QC" data-dependent-select-group="CA">Quebec</option>
+          </select>
+        </div>
+      `);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations once a group is selected", async () => {
+      await setup(`
+        <div id="widget" data-controller="dependent-select">
+          <label for="country">Country</label>
+          <select id="country" data-dependent-select-target="group" data-action="change->dependent-select#filter">
+            <option value="">Choose a country</option>
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+          </select>
+
+          <label for="state">State / Province</label>
+          <select id="state" data-dependent-select-target="dependent">
+            <option value="">Choose a state</option>
+            <option value="CA-state" data-dependent-select-group="US">California</option>
+            <option value="NY" data-dependent-select-group="US">New York</option>
+            <option value="ON" data-dependent-select-group="CA">Ontario</option>
+            <option value="QC" data-dependent-select-group="CA">Quebec</option>
+          </select>
+        </div>
+      `);
+      selectCountry("US");
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
     });
   });
 });

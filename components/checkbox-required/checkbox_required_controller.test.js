@@ -1,6 +1,25 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import CheckboxRequiredController from "./checkbox_required_controller";
+import { getA11yViolations } from "../../test/axe";
+
+const A11Y_HTML = `
+  <form id="form">
+    <fieldset id="group" data-controller="checkbox-required">
+      <legend>Interests (select at least one)</legend>
+      <label>
+        <input type="checkbox" name="interests[]" value="music" data-checkbox-required-target="checkbox" data-action="change->checkbox-required#validate">
+        Music
+      </label>
+      <label>
+        <input type="checkbox" name="interests[]" value="sport" data-checkbox-required-target="checkbox" data-action="change->checkbox-required#validate">
+        Sport
+      </label>
+      <p data-checkbox-required-target="error" hidden>Please select at least one option.</p>
+    </fieldset>
+    <button type="submit">Submit</button>
+  </form>
+`;
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -171,5 +190,24 @@ describe("CheckboxRequiredController", () => {
       "[checkbox-required] controller element is not inside a <form>; submit validation will not work.",
     );
     warn.mockRestore();
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations when valid", async () => {
+      await setup(A11Y_HTML);
+      const violations = await getA11yViolations(
+        document.getElementById("group"),
+      );
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations once the error is shown", async () => {
+      await setup(A11Y_HTML);
+      submitForm();
+      const violations = await getA11yViolations(
+        document.getElementById("group"),
+      );
+      expect(violations).toEqual([]);
+    });
   });
 });

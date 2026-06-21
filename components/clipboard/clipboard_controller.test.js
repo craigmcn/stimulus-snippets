@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import ClipboardController from "./clipboard_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -212,5 +213,49 @@ describe("ClipboardController", () => {
 
     vi.advanceTimersByTime(1);
     expect(document.getElementById("feedback").hidden).toBe(true);
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(`
+        <div id="widget" data-controller="clipboard">
+          <input
+            type="text"
+            value="Hello world"
+            data-clipboard-target="source"
+            aria-label="Text to copy"
+            readonly
+          />
+          <button id="btn" type="button" data-action="click->clipboard#copy">Copy</button>
+          <span data-clipboard-target="feedback" hidden aria-live="polite">Copied!</span>
+        </div>
+      `);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations once the feedback is shown", async () => {
+      await setup(`
+        <div id="widget" data-controller="clipboard">
+          <input
+            type="text"
+            value="Hello world"
+            data-clipboard-target="source"
+            aria-label="Text to copy"
+            readonly
+          />
+          <button id="btn" type="button" data-action="click->clipboard#copy">Copy</button>
+          <span data-clipboard-target="feedback" hidden aria-live="polite">Copied!</span>
+        </div>
+      `);
+      document.getElementById("btn").click();
+      await Promise.resolve();
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
   });
 });
