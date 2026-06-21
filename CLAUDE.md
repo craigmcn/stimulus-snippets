@@ -135,6 +135,9 @@ A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/
 - **PR #17 merged** (`feat/datetime-local-controller`) — all of the above (controller, Copilot-triage fixes, Node pinning, demo-app docs note); `main` fast-forwarded locally; 165 tests total
 - `datetime-local` demo added to the sibling `stimulus-snippets-demo` repo (controller copy, `index.js` registration, `DemosController::DEMOS` entry, view with default/date-only/time-only-long variants); verified live via a real-browser screenshot — correctly converts the server's UTC timestamp to the browser's local time, no console errors, no horizontal scroll
 - **PR #5 merged** in `stimulus-snippets-demo` (`feat/datetime-local-demo`) — the above demo; `main` fast-forwarded locally in that repo
+- `number-format` controller built — live thousands-separator grouping while typing (cursor position preserved by digit count, not character offset), full `Intl.NumberFormat` styling (`decimal`/`currency`, `locale`, `minimumFractionDigits`/`maximumFractionDigits`) applied on blur, optional `hidden` target carries a clean unformatted numeric string for form submission; `locale` deliberately affects only the formatted display, never parsing (typed/submitted values always use `.` as the decimal separator — round-tripping a locale's own separators is ambiguous); 11 tests, README, Components table row
+- Triaged via `copilot-review-triage` on PR #19: Copilot caught two real bugs — `focus()` stripped formatting from the display but never synced the `hidden` target (left it stale), and the caret jumped _before_ a lone leading `-` while typing a negative number, so the next keystroke landed ahead of the sign and `_sanitize` silently dropped it. Also caught a misleading test title (claimed "no currency code" but the fixture supplied an invalid one). My own independent pass on top found `connect()` would unconditionally reformat even if the input was already focused (e.g. a Turbo morph reconnect mid-edit), clobbering in-progress typing. All four fixed; two cosmetic/optional findings (leading-decimal hidden/display string mismatch, missing default-currency-fallback test) were deliberately left out as not worth the added complexity; 178 tests total
+- **PR #19 merged** (`feat/number-format-controller`) — all of the above; `main` fast-forwarded locally
 
 ### Key decisions
 
@@ -166,20 +169,23 @@ A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/
 - **"Well-covered elsewhere" guide is a new standalone guide page, not folded into an existing one** — it's conceptually distinct from "Setting up Rails with Stimulus" (an onboarding walkthrough vs. a reference list of third-party alternatives), so it gets its own slug and sidebar entry rather than a section bolted onto the getting-started guide.
 - **Sidebar "Guides" nav remains hand-written per-entry in `Layout.astro`, not generated from the `guides` collection** — consistent with the existing pattern (the `getting-started` link was already hardcoded); a loop over `getCollection('guides')` would be a reasonable future cleanup if a third guide gets added, but two manual entries doesn't yet justify the refactor.
 - **README links to the docs guide instead of duplicating its table** — caught in self-review of PR #16: having the same "well-covered elsewhere" table live in both `README.md` and the docs guide meant any future addition to the list had to be remembered in two places with no enforcement. Rather than building a shared-data-source mechanism (e.g. a JSON/YAML file both README and Astro read) for a single seven-row table, simplest fix was to make the docs guide canonical and have the README link out to it — mirrors how GitHub READMEs commonly point to a hosted docs site for anything beyond a quick orientation.
+- **`number-format` keeps `hidden` as the exact raw sanitized string, never a re-stringified `Number`** — avoids float round-tripping/precision loss entirely (e.g. no risk of `12.50` → `12.5` → reformat surprises on large values); the displayed value can be lossy via `Intl` formatting, but the submitted value never is.
+- **`number-format` `connect()` skips reformatting if the input is already the active element** — guards against a Turbo morph reconnecting the controller mid-edit and overwriting in-progress typing with the full currency-formatted string. Same class of "real browser/Turbo timing" gap as `slug`'s lock-on-reconnect guard and `accordion`'s connect-time exclusive enforcement.
 
 ### Open PRs (pending merge)
 
-None — **PR #13**, **PR #16**, and **PR #17** in this repo all merged; **PR #5** (`feat/datetime-local-demo`) in `stimulus-snippets-demo` also merged.
+None — **PR #13**, **PR #16**, **PR #17**, and **PR #19** in this repo all merged; **PR #5** (`feat/datetime-local-demo`) in `stimulus-snippets-demo` also merged.
 
 ### Next components (planned)
 
 Ordered by value for effort (checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com to avoid duplicating the README's "Well-covered elsewhere" list):
 
-1. `number-format` — live thousands-separator/currency formatting on an input, clean numeric value submitted via a hidden field. Medium effort, high value.
-2. `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
-3. `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
-4. `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
+1. `table-sort` — click a `<th>` to sort rows (string/number/date detection); distinct from drag-reorder `Sortable`. Medium effort, high value.
+2. `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
+3. `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
+
+`number-format` (previously #1 on this list) shipped via PR #19.
 
 ### Open questions
 
-- None currently. (Previous open question — the uncommitted `field-sizing: content` README note — is resolved: it's now mirrored into the new `well-covered-elsewhere` docs guide, merged via PR #16.)
+- None currently.
