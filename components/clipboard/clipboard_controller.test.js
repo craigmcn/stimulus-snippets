@@ -216,20 +216,22 @@ describe("ClipboardController", () => {
   });
 
   describe("accessibility", () => {
+    const A11Y_HTML = `
+      <div id="widget" data-controller="clipboard">
+        <input
+          type="text"
+          value="Hello world"
+          data-clipboard-target="source"
+          aria-label="Text to copy"
+          readonly
+        />
+        <button id="btn" type="button" data-action="click->clipboard#copy">Copy</button>
+        <span data-clipboard-target="feedback" hidden aria-live="polite">Copied!</span>
+      </div>
+    `;
+
     it("has no detectable accessibility violations using the documented usage example", async () => {
-      await setup(`
-        <div id="widget" data-controller="clipboard">
-          <input
-            type="text"
-            value="Hello world"
-            data-clipboard-target="source"
-            aria-label="Text to copy"
-            readonly
-          />
-          <button id="btn" type="button" data-action="click->clipboard#copy">Copy</button>
-          <span data-clipboard-target="feedback" hidden aria-live="polite">Copied!</span>
-        </div>
-      `);
+      await setup(A11Y_HTML);
       const violations = await getA11yViolations(
         document.getElementById("widget"),
       );
@@ -237,19 +239,7 @@ describe("ClipboardController", () => {
     });
 
     it("has no detectable accessibility violations once the feedback is shown", async () => {
-      await setup(`
-        <div id="widget" data-controller="clipboard">
-          <input
-            type="text"
-            value="Hello world"
-            data-clipboard-target="source"
-            aria-label="Text to copy"
-            readonly
-          />
-          <button id="btn" type="button" data-action="click->clipboard#copy">Copy</button>
-          <span data-clipboard-target="feedback" hidden aria-live="polite">Copied!</span>
-        </div>
-      `);
+      await setup(A11Y_HTML);
       document.getElementById("btn").click();
       await Promise.resolve();
       const violations = await getA11yViolations(

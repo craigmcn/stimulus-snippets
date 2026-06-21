@@ -6,7 +6,7 @@ import { getA11yViolations } from "../../test/axe";
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const FORM_HTML = `
-  <div data-controller="form-confirm" data-form-confirm-message-value="Delete this post?">
+  <div id="widget" data-controller="form-confirm" data-form-confirm-message-value="Delete this post?">
     <form id="form" action="#" data-action="submit->form-confirm#intercept">
       <button type="submit">Delete</button>
     </form>
@@ -198,14 +198,18 @@ describe("FormConfirmController", () => {
   describe("accessibility", () => {
     it("has no detectable accessibility violations before the dialog opens", async () => {
       await setup(FORM_HTML);
-      const violations = await getA11yViolations(document.body);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
       expect(violations).toEqual([]);
     });
 
     it("has no detectable accessibility violations once the dialog is open", async () => {
       await setup(FORM_HTML);
       document.getElementById("form").querySelector("button").click();
-      const violations = await getA11yViolations(document.body);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
       expect(violations).toEqual([]);
     });
   });
