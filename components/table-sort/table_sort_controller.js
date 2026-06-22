@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
+const VALID_TYPES = ["string", "number", "date"];
+
 export default class extends Controller {
   static targets = ["header", "row"];
 
@@ -15,7 +17,10 @@ export default class extends Controller {
     if (!th) return;
 
     const index = th.cellIndex;
-    const type = header.dataset.tableSortType || this._detectType(index);
+    const overrideType = header.dataset.tableSortType;
+    const type = VALID_TYPES.includes(overrideType)
+      ? overrideType
+      : this._detectType(index);
     const direction =
       th.getAttribute("aria-sort") === "ascending" ? "descending" : "ascending";
 

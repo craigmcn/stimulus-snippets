@@ -153,6 +153,48 @@ describe("TableSortController", () => {
 
       expect(bodyText()).toEqual(["January", "February", "March"]);
     });
+
+    it("auto-detects and sorts a date column", async () => {
+      await setup(`
+        <table data-controller="table-sort">
+          <thead>
+            <tr>
+              <th scope="col"><button type="button" data-table-sort-target="header" data-action="click->table-sort#sort">Filed</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-table-sort-target="row"><td>2026-03-01</td></tr>
+            <tr data-table-sort-target="row"><td>2025-01-15</td></tr>
+            <tr data-table-sort-target="row"><td>2025-11-30</td></tr>
+          </tbody>
+        </table>
+      `);
+
+      header("Filed").click();
+
+      expect(bodyText()).toEqual(["2025-01-15", "2025-11-30", "2026-03-01"]);
+    });
+
+    it("falls back to auto-detection when data-table-sort-type is not a recognized value", async () => {
+      await setup(`
+        <table data-controller="table-sort">
+          <thead>
+            <tr>
+              <th scope="col"><button type="button" data-table-sort-target="header" data-table-sort-type="strnig" data-action="click->table-sort#sort">Name</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-table-sort-target="row"><td>Charlie</td></tr>
+            <tr data-table-sort-target="row"><td>Alice</td></tr>
+            <tr data-table-sort-target="row"><td>Bob</td></tr>
+          </tbody>
+        </table>
+      `);
+
+      header("Name").click();
+
+      expect(bodyText()).toEqual(["Alice", "Bob", "Charlie"]);
+    });
   });
 
   describe("accessibility", () => {

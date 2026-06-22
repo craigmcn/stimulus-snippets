@@ -74,7 +74,7 @@ position in its `<tr>` — non-sortable columns (e.g. an actions column with no
 
 | Attribute               | Required | Description                                                                                                                                                                                                   |
 | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data-table-sort-type`  | No       | Set on a `header` button to force `"string"`, `"number"`, or `"date"` comparison instead of auto-detecting from the first row's cell text.                                                                    |
+| `data-table-sort-type`  | No       | Set on a `header` button to force `"string"`, `"number"`, or `"date"` comparison instead of auto-detecting from the first row's cell text. Any other value is ignored and falls back to auto-detection.       |
 | `data-table-sort-value` | No       | Set on a `<td>` to provide the comparison value instead of the cell's displayed text — useful when the display text isn't directly sortable (e.g. a formatted date, or a month name backed by a numeric key). |
 
 Type auto-detection checks the first row's cell for that column in this order:
