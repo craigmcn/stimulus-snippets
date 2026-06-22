@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import FilePreviewController from "./file_preview_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -184,6 +185,47 @@ describe("FilePreviewController", () => {
 
       expect(revokeSpy).not.toHaveBeenCalled();
       revokeSpy.mockRestore();
+    });
+  });
+
+  describe("accessibility", () => {
+    async function setupDocumented() {
+      document.body.innerHTML = `
+        <div id="widget" data-controller="file-preview">
+          <label for="attachments">Attachments</label>
+          <input
+            id="attachments"
+            type="file"
+            multiple
+            data-file-preview-target="input"
+            data-action="change->file-preview#preview"
+          />
+          <button type="button" data-action="file-preview#clear">Clear</button>
+          <ul data-file-preview-target="list"></ul>
+          <p data-file-preview-target="empty">No files chosen.</p>
+        </div>
+      `;
+      await tick();
+    }
+
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setupDocumented();
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations once files are previewed", async () => {
+      await setupDocumented();
+      selectFiles([
+        new File(["a"], "a.png", { type: "image/png" }),
+        new File(["b"], "b.txt", { type: "text/plain" }),
+      ]);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
     });
   });
 });

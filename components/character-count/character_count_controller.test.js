@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import CharacterCountController from "./character_count_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -159,6 +160,30 @@ describe("CharacterCountController", () => {
       input.dispatchEvent(new Event("input"));
 
       expect(document.getElementById("remaining").textContent).toBe("—");
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(`
+        <div id="widget" data-controller="character-count" data-character-count-max-value="280">
+          <label for="bio">Bio</label>
+          <textarea
+            id="bio"
+            name="bio"
+            maxlength="280"
+            data-character-count-target="input"
+            data-action="input->character-count#update"
+          ></textarea>
+          <p>
+            <span data-character-count-target="remaining">280</span> characters remaining
+          </p>
+        </div>
+      `);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
     });
   });
 });

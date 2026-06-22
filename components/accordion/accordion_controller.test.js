@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import AccordionController from "./accordion_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -335,6 +336,24 @@ describe("AccordionController", () => {
       keydown(document.getElementById("t0"), "ArrowDown");
       expect(document.getElementById("p0").hidden).toBe(true);
       expect(document.getElementById("p1").hidden).toBe(true);
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations when closed", async () => {
+      await setup();
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations when open", async () => {
+      await setup(FIRST_OPEN_HTML);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
     });
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import DatetimeLocalController from "./datetime_local_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 const date = new Date("2026-06-19T15:30:00Z");
@@ -171,5 +172,23 @@ describe("DatetimeLocalController", () => {
     expect(document.querySelector("time").textContent.trim()).toBe(
       "original text",
     );
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(`
+        <time
+          id="widget"
+          data-controller="datetime-local"
+          datetime="2026-06-19T15:30:00Z"
+        >
+          2026-06-19T15:30:00Z
+        </time>
+      `);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
   });
 });

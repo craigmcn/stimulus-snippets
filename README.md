@@ -6,7 +6,7 @@ Copy-pasteable Stimulus JS controllers for Ruby on Rails. Inspired by [shadcn/ui
 
 - **Minimal** — the controller does as little as possible. One controller, one job.
 - **Style-agnostic** — no CSS is included or assumed. Behaviour only.
-- **Accessible** — ARIA attributes and keyboard patterns built in where relevant.
+- **Accessible** — ARIA attributes and keyboard patterns built in where relevant; every controller's test suite runs an automated [axe-core](https://github.com/dequelabs/axe-core) accessibility check against its documented usage example.
 - **Data-driven** — configured entirely with `data-*` attributes in your HTML.
 
 ---

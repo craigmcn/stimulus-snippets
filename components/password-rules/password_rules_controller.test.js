@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import PasswordRulesController from "./password_rules_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -136,6 +137,35 @@ describe("PasswordRulesController", () => {
 
       expect(document.getElementById("min-rule").dataset.valid).toBe("false");
       expect(document.getElementById("upper-rule").dataset.valid).toBe("false");
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(`
+        <div id="widget" data-controller="password-rules">
+          <label for="password">New password</label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            autocomplete="new-password"
+            data-password-rules-target="input"
+            data-action="input->password-rules#check"
+          />
+          <ul aria-label="Password requirements" aria-live="polite">
+            <li data-password-rules-target="rule" data-min="8">At least 8 characters</li>
+            <li data-password-rules-target="rule" data-pattern="[A-Z]">One uppercase letter</li>
+            <li data-password-rules-target="rule" data-pattern="[a-z]">One lowercase letter</li>
+            <li data-password-rules-target="rule" data-pattern="[0-9]">One number</li>
+            <li data-password-rules-target="rule" data-pattern="[^A-Za-z0-9]">One special character</li>
+          </ul>
+        </div>
+      `);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
     });
   });
 });

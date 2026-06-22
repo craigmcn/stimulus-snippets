@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import TabsController from "./tabs_controller";
+import { getA11yViolations } from "../../test/axe";
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -299,6 +300,38 @@ describe("TabsController", () => {
       );
       expect(document.getElementById("p2").hidden).toBe(false);
       expect(document.getElementById("p0").hidden).toBe(true);
+    });
+  });
+
+  describe("accessibility", () => {
+    const A11Y_HTML = `
+      <div id="widget" data-controller="tabs">
+        <div role="tablist" aria-label="Example tabs">
+          <button type="button" data-tabs-target="tab" data-action="click->tabs#select keydown->tabs#keydown">Tab One</button>
+          <button type="button" data-tabs-target="tab" data-action="click->tabs#select keydown->tabs#keydown">Tab Two</button>
+          <button type="button" data-tabs-target="tab" data-action="click->tabs#select keydown->tabs#keydown">Tab Three</button>
+        </div>
+        <div data-tabs-target="panel"><p>Content for tab one.</p></div>
+        <div data-tabs-target="panel"><p>Content for tab two.</p></div>
+        <div data-tabs-target="panel"><p>Content for tab three.</p></div>
+      </div>
+    `;
+
+    it("has no detectable accessibility violations using the documented usage example", async () => {
+      await setup(A11Y_HTML);
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
+    });
+
+    it("has no detectable accessibility violations after switching tabs", async () => {
+      await setup(A11Y_HTML);
+      document.querySelectorAll("[data-tabs-target='tab']")[1].click();
+      const violations = await getA11yViolations(
+        document.getElementById("widget"),
+      );
+      expect(violations).toEqual([]);
     });
   });
 });
