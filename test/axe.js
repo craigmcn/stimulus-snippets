@@ -1,4 +1,4 @@
-import { run } from "axe-core";
+import axe from "axe-core";
 
 // jsdom has no real layout engine, so rules that depend on computed visual
 // rendering (contrast, landmark regions across a full page) are unreliable
@@ -9,6 +9,6 @@ const JSDOM_RULES = {
 };
 
 export async function getA11yViolations(node) {
-  const results = await run(node, { rules: JSDOM_RULES });
+  const results = await axe.run(node, { rules: JSDOM_RULES });
   return results.violations;
 }
