@@ -172,6 +172,24 @@ describe("RowSelectController", () => {
       expect(rowCheckboxes().every((row) => !row.checked)).toBe(true);
       expect(count().textContent).toBe("0");
     });
+
+    it("does nothing when the click target isn't a row checkbox", async () => {
+      await setup(basicTableHtml());
+
+      document
+        .querySelector("[data-controller]")
+        .insertAdjacentHTML(
+          "beforeend",
+          '<input type="checkbox" data-action="click->row-select#toggle" />',
+        );
+      const outsider = document.querySelector(
+        "[data-controller] > input[type=checkbox]",
+      );
+
+      expect(() => outsider.click()).not.toThrow();
+      expect(rowCheckboxes().every((row) => !row.checked)).toBe(true);
+      expect(count().textContent).toBe("0");
+    });
   });
 
   describe("toggleAll", () => {

@@ -20,14 +20,14 @@ export default class extends Controller {
     this._refresh();
   }
 
-  toggle(event) {
-    const checkbox = event.target;
-    const index = this.rowTargets.indexOf(checkbox);
+  toggle({ currentTarget, shiftKey }) {
+    const index = this.rowTargets.indexOf(currentTarget);
+    if (index === -1) return;
 
-    if (event.shiftKey && this._lastIndex !== null && index !== -1) {
+    if (shiftKey && this._lastIndex !== null) {
       const [start, end] = [this._lastIndex, index].sort((a, b) => a - b);
       for (let i = start; i <= end; i++) {
-        this.rowTargets[i].checked = checkbox.checked;
+        this.rowTargets[i].checked = currentTarget.checked;
       }
     }
 
