@@ -19,6 +19,7 @@ export default [
         RegExp: "readonly",
         Event: "readonly",
         KeyboardEvent: "readonly",
+        MouseEvent: "readonly",
         DOMException: "readonly",
         console: "readonly",
         URL: "readonly",
