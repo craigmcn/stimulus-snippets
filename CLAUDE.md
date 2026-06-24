@@ -195,10 +195,14 @@ A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/
 
 Ordered by value for effort (checked against stimulus-components.com, awesome-stimulusjs, and stimulush.com to avoid duplicating the README's "Well-covered elsewhere" list):
 
-1. `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value.
+1. `row-select` — table row checkboxes with select-all, shift-click range, and a bulk-actions bar; goes beyond the existing all/none-only `checkbox-select-all` pattern. Medium effort, high value. **In progress** — controller file exists on an untracked WIP branch (`feat/row-select-controller`), no test/README yet.
 2. `unsaved-changes` — warns via `beforeunload`/`turbo:before-visit` before navigating away from an edited form. Medium effort, medium-high value.
+3. `relative-time` — live-updating "5 minutes ago" style relative timestamp via `setInterval`, `aria-live="polite"` for accessibility; distinct from `datetime-local` (absolute local-tz conversion, not relative). Low effort, high value — every Rails app has `created_at`/`updated_at` timestamps.
+4. `match-validator` — generic "these two fields must match" validator (password confirmation, email confirmation). Low effort, common Rails/Devise signup pain point.
+5. `direct-upload-progress` — progress bar for Rails ActiveStorage direct uploads; ActiveStorage's own JS fires events but ships no UI. Rails-specific (no generic JS-ecosystem equivalent), same "peer API, no new dependency" shape as `clipboard`'s navigator usage. Medium effort.
+6. `multi-step-form` — wizard/stepper with per-step validation before advancing, progress indicator via `data-*`. Medium-high effort — biggest of this batch.
 
-`number-format` (previously #1 on this list) shipped via PR #19. `table-sort` (previously #1) shipped via PR #22.
+`number-format` (previously #1 on this list) shipped via PR #19. `table-sort` (previously #1) shipped via PR #22. Candidates 3–6 added 2026-06-24 after cross-checking stimulus-components.com and awesome-stimulusjs for overlap — none of the four are covered by an existing controller on this site or a mature third-party package.
 
 ### Open questions
 
