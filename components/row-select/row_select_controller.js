@@ -24,7 +24,11 @@ export default class extends Controller {
     const index = this.rowTargets.indexOf(currentTarget);
     if (index === -1) return;
 
-    if (shiftKey && this._lastIndex !== null) {
+    if (
+      shiftKey &&
+      this._lastIndex !== null &&
+      this._lastIndex < this.rowTargets.length
+    ) {
       const [start, end] = [this._lastIndex, index].sort((a, b) => a - b);
       for (let i = start; i <= end; i++) {
         this.rowTargets[i].checked = currentTarget.checked;

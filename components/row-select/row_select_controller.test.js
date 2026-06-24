@@ -190,6 +190,21 @@ describe("RowSelectController", () => {
       expect(rowCheckboxes().every((row) => !row.checked)).toBe(true);
       expect(count().textContent).toBe("0");
     });
+
+    it("ignores a stale range anchor left behind by a row removed from the DOM", async () => {
+      await setup(basicTableHtml());
+
+      rowCheckboxes()[2].click();
+      document.querySelector("tbody tr").remove();
+
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        shiftKey: true,
+      });
+
+      expect(() => rowCheckboxes()[1].dispatchEvent(event)).not.toThrow();
+      expect(count().textContent).toBe("0");
+    });
   });
 
   describe("toggleAll", () => {
