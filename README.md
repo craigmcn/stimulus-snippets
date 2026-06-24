@@ -57,6 +57,7 @@ pin "controllers/dismiss_controller", to: "controllers/dismiss_controller.js"
 | [datetime-local](components/datetime-local/)       | Display a server-rendered UTC timestamp in the viewer's local time zone                    |
 | [number-format](components/number-format/)         | Live thousands-separator/currency formatting with a clean value submitted via hidden field |
 | [table-sort](components/table-sort/)               | Click a column header to sort a table's rows, with string/number/date type detection       |
+| [row-select](components/row-select/)               | Select table rows with checkboxes — select-all, shift-click range, bulk-actions bar        |
 
 ---
 
