@@ -21,7 +21,14 @@ export default class extends Controller {
   };
 
   connect() {
-    this.element.setAttribute("aria-live", "polite");
+    if (!this.element.hasAttribute("aria-live")) {
+      this.element.setAttribute("aria-live", "polite");
+    }
+
+    this._source = (
+      this.element.getAttribute("datetime") || this.element.textContent
+    ).trim();
+
     this.render();
     this._timer = setInterval(() => this.render(), this.intervalValue);
   }
@@ -31,12 +38,9 @@ export default class extends Controller {
   }
 
   render() {
-    const isoString = (
-      this.element.getAttribute("datetime") || this.element.textContent
-    ).trim();
-    if (!isoString) return;
+    if (!this._source) return;
 
-    const date = new Date(isoString);
+    const date = new Date(this._source);
     if (Number.isNaN(date.getTime())) return;
 
     let formatter;
@@ -51,11 +55,9 @@ export default class extends Controller {
 
     let duration = (date.getTime() - Date.now()) / 1000;
     for (const division of DIVISIONS) {
-      if (Math.abs(duration) < division.amount) {
-        this.element.textContent = formatter.format(
-          Math.round(duration),
-          division.unit,
-        );
+      const rounded = Math.round(duration);
+      if (Math.abs(rounded) < division.amount) {
+        this.element.textContent = formatter.format(rounded, division.unit);
         return;
       }
       duration /= division.amount;
