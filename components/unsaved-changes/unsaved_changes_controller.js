@@ -8,14 +8,21 @@ export default class extends Controller {
   connect() {
     this._dirty = false;
     this._onChange = () => this.markDirty();
-    this._onSubmit = () => this.markClean();
+    this._onSubmit = (event) => {
+      // Deferred so that any other listener on this same submit event
+      // (e.g. form-confirm's intercept(), which calls preventDefault() to
+      // pause for a confirmation dialog) has already run by the time this
+      // checks defaultPrevented, regardless of listener registration order.
+      queueMicrotask(() => {
+        if (!event.defaultPrevented) this.markClean();
+      });
+    };
     this._onBeforeUnload = (event) => {
       if (!this._dirty) return;
       event.preventDefault();
-      event.returnValue = "";
     };
     this._onBeforeVisit = (event) => {
-      if (!this._dirty) return;
+      if (!this._dirty || event.defaultPrevented) return;
       if (!window.confirm(this.messageValue || DEFAULT_MESSAGE)) {
         event.preventDefault();
       }

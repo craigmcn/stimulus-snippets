@@ -83,10 +83,33 @@ describe("UnsavedChangesController", () => {
     form.dispatchEvent(
       new Event("submit", { bubbles: true, cancelable: true }),
     );
+    await tick();
 
     const event = dispatchBeforeUnload();
 
     expect(event.defaultPrevented).toBe(false);
+  });
+
+  it("does not clear the dirty state when another listener cancels the submit (e.g. form-confirm)", async () => {
+    await setup(FORM_HTML);
+    const form = document.querySelector("form");
+    const input = document.getElementById("title");
+
+    // Simulates a controller like form-confirm sharing the same submit
+    // event and deferring the real submission behind a confirmation
+    // dialog. Registered after unsaved-changes's own listener, the same
+    // way a second data-controller token on the form would be.
+    form.addEventListener("submit", (event) => event.preventDefault());
+
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    form.dispatchEvent(
+      new Event("submit", { bubbles: true, cancelable: true }),
+    );
+    await tick();
+
+    const event = dispatchBeforeUnload();
+
+    expect(event.defaultPrevented).toBe(true);
   });
 
   it("confirms before a Turbo visit when dirty, allowing the visit on confirm", async () => {
@@ -127,6 +150,32 @@ describe("UnsavedChangesController", () => {
 
     expect(confirmSpy).not.toHaveBeenCalled();
     expect(event.defaultPrevented).toBe(false);
+
+    confirmSpy.mockRestore();
+  });
+
+  it("does not re-prompt a second dirty instance once an earlier one already cancelled the visit", async () => {
+    await setup(`
+      <form data-controller="unsaved-changes" data-unsaved-changes-message-value="Discard A?">
+        <input id="title-a" type="text" name="title" />
+      </form>
+      <form data-controller="unsaved-changes" data-unsaved-changes-message-value="Discard B?">
+        <input id="title-b" type="text" name="title" />
+      </form>
+    `);
+    document
+      .getElementById("title-a")
+      .dispatchEvent(new Event("input", { bubbles: true }));
+    document
+      .getElementById("title-b")
+      .dispatchEvent(new Event("input", { bubbles: true }));
+
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const event = new Event("turbo:before-visit", { cancelable: true });
+    document.dispatchEvent(event);
+
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(event.defaultPrevented).toBe(true);
 
     confirmSpy.mockRestore();
   });
