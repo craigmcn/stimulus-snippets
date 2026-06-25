@@ -4,6 +4,7 @@
     "FOUC",
     "hotwired",
     "importmap",
+    "jsbundling",
     "pasteable",
     "Shiki"
   ]
