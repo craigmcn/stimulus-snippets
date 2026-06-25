@@ -12,6 +12,7 @@ export default [
       sourceType: "module",
       globals: {
         navigator: "readonly",
+        window: "readonly",
         document: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
