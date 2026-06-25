@@ -16,6 +16,8 @@ export default [
         document: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
         queueMicrotask: "readonly",
         parseInt: "readonly",
         RegExp: "readonly",
