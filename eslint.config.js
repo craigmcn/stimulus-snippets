@@ -22,6 +22,7 @@ export default [
         parseInt: "readonly",
         RegExp: "readonly",
         Event: "readonly",
+        CustomEvent: "readonly",
         KeyboardEvent: "readonly",
         MouseEvent: "readonly",
         DOMException: "readonly",
