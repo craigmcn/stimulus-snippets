@@ -32,6 +32,7 @@ export default class extends Controller {
 
     item.element.dataset.directUploadProgressState = "error";
     this._announce(`${item.file.name} failed: ${error}`);
+    this._items.delete(id);
   }
 
   end(event) {
@@ -44,6 +45,8 @@ export default class extends Controller {
       item.progressElement.value = 100;
       this._announce(`${item.file.name} uploaded`);
     }
+
+    this._items.delete(id);
   }
 
   _buildItem(id, file) {

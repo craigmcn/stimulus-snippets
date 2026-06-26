@@ -132,6 +132,16 @@ describe("DirectUploadProgressController", () => {
         "a.png failed: Upload failed",
       );
     });
+
+    it("ignores a late progress event for the same id after erroring", async () => {
+      await setup();
+      dispatch("direct-upload:initialize", { id: 1, file: file() });
+      dispatch("direct-upload:progress", { id: 1, progress: 30 });
+      dispatch("direct-upload:error", { id: 1, error: "Upload failed" });
+      dispatch("direct-upload:progress", { id: 1, progress: 80 });
+
+      expect(document.querySelector("progress").value).toBe(30);
+    });
   });
 
   describe("end", () => {
@@ -160,6 +170,15 @@ describe("DirectUploadProgressController", () => {
     it("ignores end for an unknown id", async () => {
       await setup();
       expect(() => dispatch("direct-upload:end", { id: 99 })).not.toThrow();
+    });
+
+    it("ignores a late progress event for the same id after ending", async () => {
+      await setup();
+      dispatch("direct-upload:initialize", { id: 1, file: file() });
+      dispatch("direct-upload:end", { id: 1 });
+      dispatch("direct-upload:progress", { id: 1, progress: 50 });
+
+      expect(document.querySelector("progress").value).toBe(100);
     });
   });
 

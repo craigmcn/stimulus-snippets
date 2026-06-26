@@ -62,7 +62,7 @@ All four events are dispatched by ActiveStorage's own direct upload JS on the fi
 
 ### Item state
 
-Each `<li>` gets `data-direct-upload-progress-state`, one of `uploading`, `done`, or `error`. Use it to style the row (e.g. a red border on `error`).
+Each `<li>` gets `data-direct-upload-progress-state`, one of `uploading`, `done`, or `error`. Use it to style the row (e.g. a red border on `error`). The filename `<span>` inside it carries `data-direct-upload-progress-role="name"` so you can target it in CSS.
 
 ## Accessibility
 
