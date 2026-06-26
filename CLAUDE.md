@@ -213,7 +213,7 @@ A separate sibling repo, [`stimulus-snippets-demo`](https://github.com/craigmcn/
 
 ### Open PRs (pending merge)
 
-- None currently.
+- **PR #27** (`feat/direct-upload-progress-controller`) — `direct-upload-progress` controller + the `match-validator` checkpoint commit it absorbed from the now-deleted `chore/checkpoint-match-validator` branch, plus a follow-up commit addressing `copilot-review-triage` findings (Map cleanup on terminal events, README doc gap). Self-reviewed (`/review-pr`) and Copilot-triaged; awaiting merge.
 
 **PR #13**, **PR #16**, **PR #17**, **PR #19**, **PR #21**, **PR #22**, **PR #23** (`feat/row-select-controller`), **PR #25** (`feat/relative-time-controller`), and **PR #26** (`feat/match-validator-controller`) in this repo all merged; **PR #5** (`feat/datetime-local-demo`), **PR #8** (`feat/row-select-demo`), **PR #11** (`feat/relative-time-demo`), and **PR #12** (`feat/match-validator-demo`) in `stimulus-snippets-demo` also merged. The `row-select` demo (5-row table; "Delete selected" removes checked rows directly from the page) was verified live via Playwright against the system Chrome — range select, delete, and a post-delete shift-click (exercising the stale-range-anchor fix from PR #23) all behaved correctly with zero console errors. The `relative-time` demo (four `<time>` elements covering past/future timestamps, the `numeric: "always"` override, and a custom render interval) was likewise verified live via Playwright with zero console errors. The `match-validator` demo (password/confirm-password and case-insensitive email/confirm-email examples) was likewise verified live via Playwright with zero console errors.
 
