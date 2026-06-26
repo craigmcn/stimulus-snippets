@@ -60,6 +60,7 @@ pin "controllers/dismiss_controller", to: "controllers/dismiss_controller.js"
 | [row-select](components/row-select/)               | Select table rows with checkboxes — select-all, shift-click range, bulk-actions bar        |
 | [unsaved-changes](components/unsaved-changes/)     | Warn before navigating away from a form with unsaved edits                                 |
 | [relative-time](components/relative-time/)         | Live-updating "5 minutes ago" style relative timestamp                                     |
+| [match-validator](components/match-validator/)     | Require two fields to match before form submit (password/email confirmation)               |
 
 ---
 
