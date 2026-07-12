@@ -224,3 +224,7 @@ None currently — the project is effectively feature-complete for its original 
 ### Open questions
 
 - None currently.
+
+### Open TODOs
+
+Tracked as issues in the [stimulus-snippets GitHub Project](https://github.com/users/craigmcn/projects/13) (GitHub Actions bump).
