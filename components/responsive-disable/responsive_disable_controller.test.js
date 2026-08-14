@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { Application } from "@hotwired/stimulus";
 import ResponsiveDisableController from "./responsive_disable_controller";
 import { getA11yViolations } from "../../test/axe";
@@ -20,13 +20,12 @@ const SELF_HTML = `
 `;
 
 const WRAPPER_HTML = `
-  <div class="d-none d-md-block">
+  <div class="d-none d-md-block" data-controller="responsive-disable">
     <label for="promo">Promo code</label>
     <input
       id="promo"
       type="text"
       name="promo"
-      data-controller="responsive-disable"
       data-responsive-disable-target="field"
     />
   </div>
@@ -106,6 +105,24 @@ describe("ResponsiveDisableController", () => {
     wrapper.style.display = "";
     dispatchResize();
     expect(field.disabled).toBe(false);
+  });
+
+  it("warns and does not attempt to disable a non-form-control element when the field target is missing", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await setup(`
+      <div class="d-none d-md-block" data-controller="responsive-disable">
+        <label for="promo">Promo code</label>
+        <input id="promo" type="text" name="promo" />
+      </div>
+    `);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("does not support the disabled attribute"),
+    );
+    expect(document.getElementById("promo").disabled).toBe(false);
+
+    warnSpy.mockRestore();
   });
 
   it("removes its resize listener on disconnect", async () => {

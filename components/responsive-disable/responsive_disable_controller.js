@@ -4,6 +4,15 @@ export default class extends Controller {
   static targets = ["field"];
 
   connect() {
+    const field = this.hasFieldTarget ? this.fieldTarget : this.element;
+
+    if (!("disabled" in field)) {
+      console.warn(
+        '[responsive-disable] resolved field does not support the disabled attribute; add a data-responsive-disable-target="field" to the actual form control.',
+      );
+      return;
+    }
+
     this._sync = this._sync.bind(this);
     window.addEventListener("resize", this._sync);
     this._sync();
