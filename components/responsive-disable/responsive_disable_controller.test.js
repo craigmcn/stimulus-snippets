@@ -212,7 +212,37 @@ describe("ResponsiveDisableController", () => {
     expect(field.disabled).toBe(false);
   });
 
-  it("keeps same-name fields in sync when one is edited", async () => {
+  it("keeps a same-name field pair in sync in both directions when each has its own controller", async () => {
+    await setup(`
+      <input
+        id="promo-desktop"
+        type="text"
+        name="promo"
+        class="d-none d-md-block"
+        data-controller="responsive-disable"
+      />
+      <input
+        id="promo-mobile"
+        type="text"
+        name="promo"
+        class="d-md-none"
+        data-controller="responsive-disable"
+      />
+    `);
+
+    const desktop = document.getElementById("promo-desktop");
+    const mobile = document.getElementById("promo-mobile");
+
+    desktop.value = "SAVE10";
+    desktop.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(mobile.value).toBe("SAVE10");
+
+    mobile.value = "SAVE20";
+    mobile.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(desktop.value).toBe("SAVE20");
+  });
+
+  it("does not sync into a same-name counterpart that has no controller of its own", async () => {
     await setup(`
       <input
         id="promo-desktop"
@@ -224,13 +254,12 @@ describe("ResponsiveDisableController", () => {
       <input id="promo-mobile" type="text" name="promo" class="d-md-none" />
     `);
 
-    const desktop = document.getElementById("promo-desktop");
     const mobile = document.getElementById("promo-mobile");
 
-    desktop.value = "SAVE10";
-    desktop.dispatchEvent(new Event("input", { bubbles: true }));
+    mobile.value = "SAVE20";
+    mobile.dispatchEvent(new Event("input", { bubbles: true }));
 
-    expect(mobile.value).toBe("SAVE10");
+    expect(document.getElementById("promo-desktop").value).toBe("");
   });
 
   it("only syncs fields sharing the same name within the closest form", async () => {
