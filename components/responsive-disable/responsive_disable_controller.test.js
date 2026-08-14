@@ -3,8 +3,6 @@ import { Application } from "@hotwired/stimulus";
 import ResponsiveDisableController from "./responsive_disable_controller";
 import { getA11yViolations } from "../../test/axe";
 
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
-
 function dispatchResize() {
   window.dispatchEvent(new Event("resize"));
 }
@@ -35,18 +33,23 @@ describe("ResponsiveDisableController", () => {
   let application;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     application = Application.start();
     application.register("responsive-disable", ResponsiveDisableController);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     document.body.innerHTML = "";
+    if (vi.isFakeTimers()) {
+      await vi.advanceTimersByTimeAsync(0);
+    }
     application.stop();
+    vi.useRealTimers();
   });
 
   async function setup(html) {
     document.body.innerHTML = html;
-    await tick();
+    await vi.advanceTimersByTimeAsync(0);
   }
 
   it("leaves a visible field enabled", async () => {
@@ -70,12 +73,15 @@ describe("ResponsiveDisableController", () => {
     expect(document.getElementById("promo").disabled).toBe(true);
   });
 
-  it("disables the field once it's hidden by a resize", async () => {
+  it("disables the field once it's hidden by a resize, after the debounce delay", async () => {
     await setup(SELF_HTML);
     const field = document.getElementById("promo");
 
     field.style.display = "none";
     dispatchResize();
+    expect(field.disabled).toBe(false);
+
+    await vi.advanceTimersByTimeAsync(150);
 
     expect(field.disabled).toBe(true);
   });
@@ -86,11 +92,52 @@ describe("ResponsiveDisableController", () => {
 
     field.style.display = "none";
     dispatchResize();
+    await vi.advanceTimersByTimeAsync(150);
     expect(field.disabled).toBe(true);
 
     field.style.display = "";
     dispatchResize();
+    await vi.advanceTimersByTimeAsync(150);
     expect(field.disabled).toBe(false);
+  });
+
+  it("collapses rapid resize events into a single sync after the debounce delay", async () => {
+    await setup(SELF_HTML);
+    const field = document.getElementById("promo");
+
+    field.style.display = "none";
+    dispatchResize();
+    await vi.advanceTimersByTimeAsync(50);
+    dispatchResize();
+    await vi.advanceTimersByTimeAsync(50);
+    dispatchResize();
+    await vi.advanceTimersByTimeAsync(50);
+    expect(field.disabled).toBe(false);
+
+    await vi.advanceTimersByTimeAsync(100);
+    expect(field.disabled).toBe(true);
+  });
+
+  it("honors a custom delay value", async () => {
+    await setup(`
+      <label for="promo">Promo code</label>
+      <input
+        id="promo"
+        type="text"
+        name="promo"
+        data-controller="responsive-disable"
+        data-responsive-disable-delay-value="500"
+      />
+    `);
+    const field = document.getElementById("promo");
+
+    field.style.display = "none";
+    dispatchResize();
+    await vi.advanceTimersByTimeAsync(150);
+    expect(field.disabled).toBe(false);
+
+    await vi.advanceTimersByTimeAsync(350);
+    expect(field.disabled).toBe(true);
   });
 
   it("detects visibility hidden by an ancestor wrapper, not just the field itself", async () => {
@@ -100,10 +147,23 @@ describe("ResponsiveDisableController", () => {
 
     wrapper.style.display = "none";
     dispatchResize();
+    await vi.advanceTimersByTimeAsync(150);
     expect(field.disabled).toBe(true);
 
     wrapper.style.display = "";
     dispatchResize();
+    await vi.advanceTimersByTimeAsync(150);
+    expect(field.disabled).toBe(false);
+  });
+
+  it("stops checking visibility at the controller's own element, ignoring hidden ancestors outside it", async () => {
+    await setup(`
+      <div id="collapsible" style="display: none">
+        ${WRAPPER_HTML}
+      </div>
+    `);
+    const field = document.getElementById("promo");
+
     expect(field.disabled).toBe(false);
   });
 
@@ -130,18 +190,107 @@ describe("ResponsiveDisableController", () => {
     const field = document.getElementById("promo");
 
     document.body.innerHTML = "";
-    await tick();
+    await vi.advanceTimersByTimeAsync(0);
+
+    field.style.display = "none";
+    dispatchResize();
+    await vi.advanceTimersByTimeAsync(150);
+
+    expect(field.disabled).toBe(false);
+  });
+
+  it("cancels a pending debounced sync on disconnect", async () => {
+    await setup(SELF_HTML);
+    const field = document.getElementById("promo");
 
     field.style.display = "none";
     dispatchResize();
 
+    document.body.innerHTML = "";
+    await vi.advanceTimersByTimeAsync(150);
+
     expect(field.disabled).toBe(false);
+  });
+
+  it("keeps a same-name field pair in sync in both directions when each has its own controller", async () => {
+    await setup(`
+      <input
+        id="promo-desktop"
+        type="text"
+        name="promo"
+        class="d-none d-md-block"
+        data-controller="responsive-disable"
+      />
+      <input
+        id="promo-mobile"
+        type="text"
+        name="promo"
+        class="d-md-none"
+        data-controller="responsive-disable"
+      />
+    `);
+
+    const desktop = document.getElementById("promo-desktop");
+    const mobile = document.getElementById("promo-mobile");
+
+    desktop.value = "SAVE10";
+    desktop.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(mobile.value).toBe("SAVE10");
+
+    mobile.value = "SAVE20";
+    mobile.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(desktop.value).toBe("SAVE20");
+  });
+
+  it("does not sync into a same-name counterpart that has no controller of its own", async () => {
+    await setup(`
+      <input
+        id="promo-desktop"
+        type="text"
+        name="promo"
+        class="d-none d-md-block"
+        data-controller="responsive-disable"
+      />
+      <input id="promo-mobile" type="text" name="promo" class="d-md-none" />
+    `);
+
+    const mobile = document.getElementById("promo-mobile");
+
+    mobile.value = "SAVE20";
+    mobile.dispatchEvent(new Event("input", { bubbles: true }));
+
+    expect(document.getElementById("promo-desktop").value).toBe("");
+  });
+
+  it("only syncs fields sharing the same name within the closest form", async () => {
+    await setup(`
+      <form id="form-a">
+        <input
+          id="a-promo"
+          type="text"
+          name="promo"
+          data-controller="responsive-disable"
+        />
+      </form>
+      <form id="form-b">
+        <input id="b-promo" type="text" name="promo" />
+      </form>
+    `);
+
+    const fieldA = document.getElementById("a-promo");
+    const fieldB = document.getElementById("b-promo");
+
+    fieldA.value = "SAVE10";
+    fieldA.dispatchEvent(new Event("input", { bubbles: true }));
+
+    expect(fieldB.value).toBe("");
   });
 
   describe("accessibility", () => {
     it("has no violations when the field is visible", async () => {
       await setup(SELF_HTML);
 
+      vi.useRealTimers();
       const violations = await getA11yViolations(document.body);
 
       expect(violations).toEqual([]);
@@ -153,7 +302,9 @@ describe("ResponsiveDisableController", () => {
 
       field.style.display = "none";
       dispatchResize();
+      await vi.advanceTimersByTimeAsync(150);
 
+      vi.useRealTimers();
       const violations = await getA11yViolations(document.body);
 
       expect(violations).toEqual([]);
