@@ -14,6 +14,7 @@ export default [
         navigator: "readonly",
         window: "readonly",
         document: "readonly",
+        getComputedStyle: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
         setInterval: "readonly",

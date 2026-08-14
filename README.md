@@ -62,6 +62,7 @@ pin "controllers/dismiss_controller", to: "controllers/dismiss_controller.js"
 | [relative-time](components/relative-time/)                   | Live-updating "5 minutes ago" style relative timestamp                                     |
 | [match-validator](components/match-validator/)               | Require two fields to match before form submit (password/email confirmation)               |
 | [direct-upload-progress](components/direct-upload-progress/) | Progress bar for each file during a Rails ActiveStorage direct upload                      |
+| [responsive-disable](components/responsive-disable/)         | Disable a form field while it's hidden by responsive CSS, so it isn't submitted            |
 
 ---
 
